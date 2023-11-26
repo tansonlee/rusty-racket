@@ -108,4 +108,4 @@ pub fn interpret(expr: Expr) -> N {
         Expr::NumExpr(x) => interpret_num_expr(x),
         Expr::BoolExpr(_x) => todo!("Not implemented"),
     }
-} 
+}

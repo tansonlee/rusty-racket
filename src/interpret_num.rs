@@ -1,7 +1,6 @@
 pub type N = i32;
 
-#[derive(PartialEq)]
-#[derive(Debug)]
+#[derive(PartialEq, Debug)]
 pub enum BinaryNumOp {
     Add,
     Sub,
