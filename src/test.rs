@@ -145,4 +145,7 @@ fn lexer() {
 #[test]
 fn interpreter() {
     assert_eq!(interpret(parse("(+ 1 2)".to_string())), 3);
+    assert_eq!(interpret(parse("(+ (- 5 1) 2)".to_string())), 6);
+    assert_eq!(interpret(parse("(+ (- 5 1) (/ 10 5))".to_string())), 6);
+    assert_eq!(interpret(parse("(+ 1 (+ 1 (+ 1 (+ 1 (+ 1 (+ 1 0))))))".to_string())), 6);
 }
