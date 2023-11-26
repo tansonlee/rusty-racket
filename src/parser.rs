@@ -20,22 +20,13 @@ pub fn parse(program: String) -> Expr {
 
 fn parse_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Expr {
     match tokens.peek().unwrap().kind {
-        TokenKind::Number => Expr::NumExpr(Num::Literal(
-            tokens.next().unwrap().text.parse::<i32>().unwrap(),
-        )),
-        TokenKind::Boolean => Expr::BoolExpr(Bool::Literal(
-            tokens.next().unwrap().text.parse::<bool>().unwrap(),
-        )),
+        TokenKind::Number => Expr::NumExpr(Num::Literal(tokens.next().unwrap().text.parse::<i32>().unwrap())),
+        TokenKind::Boolean => Expr::BoolExpr(Bool::Literal(tokens.next().unwrap().text.parse::<bool>().unwrap())),
         TokenKind::OpenParen => match tokens.peek_nth(1).unwrap().kind {
-            TokenKind::Plus | TokenKind::Minus | TokenKind::Slash | TokenKind::Star => {
-                Expr::NumExpr(parse_num_expr(tokens))
+            TokenKind::Plus | TokenKind::Minus | TokenKind::Slash | TokenKind::Star => Expr::NumExpr(parse_num_expr(tokens)),
+            TokenKind::Ampersand | TokenKind::Pipe | TokenKind::Bang | TokenKind::LessThan | TokenKind::Equal | TokenKind::GreaterThan => {
+                Expr::BoolExpr(parse_bool_expr(tokens))
             }
-            TokenKind::Ampersand
-            | TokenKind::Pipe
-            | TokenKind::Bang
-            | TokenKind::LessThan
-            | TokenKind::Equal
-            | TokenKind::GreaterThan => Expr::BoolExpr(parse_bool_expr(tokens)),
             _ => panic!("Invalid expression starting with an open parenthesis '('"),
         },
         _ => panic!("Malformed expression, expression begins with an illegal character."),
@@ -60,12 +51,10 @@ fn parse_num_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Num {
 fn parse_bool_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Bool {
     match tokens.peek().unwrap().kind {
         TokenKind::Boolean => Bool::Literal(tokens.next().unwrap().text.parse::<B>().unwrap()),
-        _ => match tokens.nth(1).unwrap().kind {
+        _ => match tokens.peek_nth(1).unwrap().kind {
             TokenKind::Ampersand | TokenKind::Pipe => parse_binary_bool_expr(tokens),
             TokenKind::Bang => parse_unary_bool_expr(tokens),
-            TokenKind::LessThan | TokenKind::Equal | TokenKind::GreaterThan => {
-                parse_cmp_bool_expr(tokens)
-            }
+            TokenKind::LessThan | TokenKind::Equal | TokenKind::GreaterThan => parse_cmp_bool_expr(tokens),
             _ => panic!("Invalid expression starting with an open parenthesis '('"),
         },
     }

@@ -144,8 +144,15 @@ fn lexer() {
 
 #[test]
 fn interpreter() {
-    assert_eq!(interpret(parse("(+ 1 2)".to_string())), 3);
-    assert_eq!(interpret(parse("(+ (- 5 1) 2)".to_string())), 6);
-    assert_eq!(interpret(parse("(+ (- 5 1) (/ 10 5))".to_string())), 6);
-    assert_eq!(interpret(parse("(+ 1 (+ 1 (+ 1 (+ 1 (+ 1 (+ 1 0))))))".to_string())), 6);
+    assert_eq!(interpret(parse("1010101".to_string())), Result::Num(1010101));
+    assert_eq!(interpret(parse("(+ 1 2)".to_string())), Result::Num(3));
+    assert_eq!(interpret(parse("(+ (- 5 1) 2)".to_string())), Result::Num(6));
+    assert_eq!(interpret(parse("(+ (- 5 1) (/ 10 5))".to_string())), Result::Num(6));
+    assert_eq!(interpret(parse("(+ 1 (+ 1 (+ 1 (+ 1 (+ 1 (+ 1 0))))))".to_string())), Result::Num(6));
+
+    assert_eq!(interpret(parse("false".to_string())), Result::Bool(false));
+    assert_eq!(interpret(parse("true".to_string())), Result::Bool(true));
+    assert_eq!(interpret(parse("(& true false)".to_string())), Result::Bool(false));
+    assert_eq!(interpret(parse("(& (| false true) (| false true))".to_string())), Result::Bool(true));
+    assert_eq!(interpret(parse("(& (| false true) (| (! true) true))".to_string())), Result::Bool(true));
 }
