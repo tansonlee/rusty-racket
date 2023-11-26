@@ -1,5 +1,5 @@
-use crate::interpret_num::*;
 use crate::interpret::*;
+use crate::interpret_num::*;
 
 #[derive(Debug)]
 pub enum Bool {

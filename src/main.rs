@@ -6,8 +6,8 @@ mod interpret_num;
 mod lexer;
 mod parser;
 
-use crate::parser::*;
 use crate::interpret::interpret;
+use crate::parser::*;
 
 fn main() {
     println!("{:?}", interpret(parse("(+ 1 false)".to_string())));

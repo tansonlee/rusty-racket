@@ -1,5 +1,5 @@
-use crate::interpret_num::*;
 use crate::interpret_bool::*;
+use crate::interpret_num::*;
 
 pub type N = i32;
 pub type B = bool;

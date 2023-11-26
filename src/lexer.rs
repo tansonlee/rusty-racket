@@ -6,6 +6,8 @@ pub enum TokenKind {
     Number,
     Boolean,
 
+    // Keywords
+
     // Special characters
     OpenParen,
     CloseParen,
@@ -120,15 +122,20 @@ fn token_from_position(s: &mut std::iter::Peekable<std::str::Chars>) -> Token {
     }
 
     if s.peek().unwrap().is_ascii_alphabetic() {
-        let mut boolean_buff = String::new();
+        let mut buff = String::new();
         while s.peek().is_some() && s.peek().unwrap().is_ascii_alphabetic() {
-            boolean_buff.push(s.next().unwrap());
+            buff.push(s.next().unwrap());
         }
 
-        return Token {
-            kind: TokenKind::Boolean,
-            text: boolean_buff,
-        };
+        if buff == "true" || buff == "false" {
+            return Token {
+                kind: TokenKind::Boolean,
+                text: buff,
+            };
+        }
+
+        println!("{}", buff);
+        panic!("Unknown keyword");
     }
 
     match s.next().unwrap() {

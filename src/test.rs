@@ -1,7 +1,7 @@
 use crate::interpret::*;
 use crate::parser::parse;
 
-#[test] 
+#[test]
 fn number_literal() {
     assert_eq!(interpret(parse("1010101".to_string())), Result::Num(1010101));
     assert_eq!(interpret(parse("0".to_string())), Result::Num(0));
@@ -31,3 +31,4 @@ fn interpret_boolean_expr() {
     assert_eq!(interpret(parse("(& (| false true) (| false true))".to_string())), Result::Bool(true));
     assert_eq!(interpret(parse("(& (| false true) (| (! true) true))".to_string())), Result::Bool(true));
 }
+
