@@ -1,15 +1,16 @@
 #![allow(dead_code)]
 
+mod interpret;
 mod interpret_bool;
 mod interpret_num;
 mod lexer;
 mod parser;
 
 use crate::parser::*;
+use crate::interpret::interpret;
 
 fn main() {
-    println!("{:?}", parse("(& true false)".to_string()));
-    println!("Hello, world!");
+    println!("{:?}", interpret(parse("(+ 1 false)".to_string())));
 }
 
 #[cfg(test)]

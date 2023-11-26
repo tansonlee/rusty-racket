@@ -1,6 +1,7 @@
 use itertools::peek_nth;
 use itertools::PeekNth;
 
+use crate::interpret::*;
 use crate::interpret_bool::*;
 use crate::interpret_num::*;
 use crate::lexer::*;
@@ -20,6 +21,7 @@ pub fn parse(program: String) -> Expr {
 
 fn parse_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Expr {
     match tokens.peek().unwrap().kind {
+        TokenKind::Minus => Expr::NumExpr(parse_num_expr(tokens)),
         TokenKind::Number => Expr::NumExpr(Num::Literal(tokens.next().unwrap().text.parse::<i32>().unwrap())),
         TokenKind::Boolean => Expr::BoolExpr(Bool::Literal(tokens.next().unwrap().text.parse::<bool>().unwrap())),
         TokenKind::OpenParen => match tokens.peek_nth(1).unwrap().kind {
@@ -36,6 +38,8 @@ fn parse_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Expr {
 fn parse_num_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Num {
     match tokens.peek().unwrap().kind {
         TokenKind::Number => Num::Literal(tokens.next().unwrap().text.parse::<N>().unwrap()),
+        // Do nth(1) because the negative sign needs to be consumed.
+        TokenKind::Minus => Num::Literal(-tokens.nth(1).unwrap().text.parse::<N>().unwrap()),
         _ => {
             tokens.next(); // Consume open paren
             let op = token_kind_to_binary_num_op(&tokens.next().unwrap().kind);

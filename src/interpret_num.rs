@@ -1,4 +1,4 @@
-pub type N = i32;
+use crate::interpret::N;
 
 #[derive(PartialEq, Debug)]
 pub enum BinaryNumOp {

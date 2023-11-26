@@ -1,18 +1,5 @@
 use crate::interpret_num::*;
-
-pub type B = bool;
-
-#[derive(PartialEq, Debug)]
-pub enum Result {
-    Num(N),
-    Bool(B),
-}
-
-#[derive(Debug)]
-pub enum Expr {
-    BoolExpr(Bool),
-    NumExpr(Num),
-}
+use crate::interpret::*;
 
 #[derive(Debug)]
 pub enum Bool {
@@ -106,12 +93,5 @@ fn interpret_cmp_bool_expr(expr: CmpBoolExpr) -> B {
         CmpBoolOp::Lt => left < right,
         CmpBoolOp::Eq => left == right,
         CmpBoolOp::Gt => left > right,
-    }
-}
-
-pub fn interpret(expr: Expr) -> Result {
-    match expr {
-        Expr::NumExpr(x) => Result::Num(interpret_num_expr(x)),
-        Expr::BoolExpr(x) => Result::Bool(interpret_bool_expr(x)),
     }
 }
