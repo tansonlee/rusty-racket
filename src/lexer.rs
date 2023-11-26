@@ -44,10 +44,7 @@ impl<'a> TokenIter<'a> {
 
     pub fn peek_n(&self, n: i32) -> Option<(&Token, &Token)> {
         if self.index + (n as usize) < self.tokens.len() {
-            Some((
-                &self.tokens[self.index],
-                &self.tokens[self.index + n as usize],
-            ))
+            Some((&self.tokens[self.index], &self.tokens[self.index + n as usize]))
         } else {
             None
         }
@@ -82,7 +79,10 @@ pub fn token_kind_to_binary_bool_op(kind: &TokenKind) -> BinaryBoolOp {
     match kind {
         TokenKind::Ampersand => BinaryBoolOp::And,
         TokenKind::Pipe => BinaryBoolOp::Or,
-        _ => panic!("Could not parse token kind to binary bool op"),
+        _ => {
+            println!("{:?}", kind);
+            panic!("Could not parse token kind to binary bool op");
+        }
     }
 }
 
@@ -119,9 +119,9 @@ fn token_from_position(s: &mut std::iter::Peekable<std::str::Chars>) -> Token {
         };
     }
 
-    if s.peek().unwrap().is_alphabetic() {
+    if s.peek().unwrap().is_ascii_alphabetic() {
         let mut boolean_buff = String::new();
-        while s.peek().is_some() && s.peek().unwrap().is_alphabetic() {
+        while s.peek().is_some() && s.peek().unwrap().is_ascii_alphabetic() {
             boolean_buff.push(s.next().unwrap());
         }
 
