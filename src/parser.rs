@@ -1,5 +1,5 @@
-use itertools::PeekNth;
 use itertools::peek_nth;
+use itertools::PeekNth;
 
 use crate::interpret_bool::*;
 use crate::interpret_num::*;
@@ -46,7 +46,7 @@ fn parse_num_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Num {
     match tokens.peek().unwrap().kind {
         TokenKind::Number => Num::Literal(tokens.next().unwrap().text.parse::<N>().unwrap()),
         _ => {
-            tokens.next(); // Consume open paren 
+            tokens.next(); // Consume open paren
             let op = token_kind_to_binary_num_op(&tokens.next().unwrap().kind);
             let left = parse_num_expr(tokens);
             let right = parse_num_expr(tokens);

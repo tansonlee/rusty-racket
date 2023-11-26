@@ -1,8 +1,7 @@
 use crate::interpret_bool::*;
 use crate::interpret_num::*;
 
-#[derive(PartialEq)]
-#[derive(Debug)]
+#[derive(PartialEq, Debug)]
 pub enum TokenKind {
     Number,
     Boolean,
@@ -26,8 +25,7 @@ pub enum TokenKind {
     GreaterThan,
 }
 
-#[derive(PartialEq)]
-#[derive(Debug)]
+#[derive(PartialEq, Debug)]
 pub struct Token {
     pub kind: TokenKind,
     pub text: String,
