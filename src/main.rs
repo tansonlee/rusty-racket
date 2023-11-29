@@ -3,6 +3,7 @@
 mod interpret;
 mod interpret_bool;
 mod interpret_num;
+mod interpret_cond;
 mod lexer;
 mod parser;
 
