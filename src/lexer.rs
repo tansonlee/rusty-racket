@@ -1,3 +1,6 @@
+use std::iter::Peekable;
+use std::str::Chars;
+
 use crate::interpret_bool::*;
 use crate::interpret_num::*;
 
@@ -7,6 +10,7 @@ pub enum TokenKind {
     Boolean,
 
     // Keywords
+    Cond,
 
     // Special characters
     OpenParen,
@@ -134,6 +138,13 @@ fn token_from_position(s: &mut std::iter::Peekable<std::str::Chars>) -> Token {
             };
         }
 
+        if buff == "cond" {
+            return Token {
+                kind: TokenKind::Cond,
+                text: buff,
+            }
+        }
+
         println!("{}", buff);
         panic!("Unknown keyword");
     }
@@ -195,13 +206,18 @@ pub fn string_to_tokens(s: String) -> Vec<Token> {
     let mut result = Vec::new();
     let mut s_iterator = s.chars().into_iter().peekable();
 
+    consume_whitespace(&mut s_iterator);
     while s_iterator.peek().is_some() {
-        while s_iterator.peek().is_some_and(|x| x.is_whitespace()) {
-            s_iterator.next();
-        }
         let token = token_from_position(&mut s_iterator);
         result.push(token);
+        consume_whitespace(&mut s_iterator);
     }
 
     result
+}
+
+fn consume_whitespace(it: &mut Peekable<Chars<'_>>) {
+    while it.peek().is_some_and(|x| x.is_whitespace()) {
+        it.next();
+    }
 }

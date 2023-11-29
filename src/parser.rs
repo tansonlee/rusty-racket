@@ -4,6 +4,7 @@ use itertools::PeekNth;
 use crate::interpret::*;
 use crate::interpret_bool::*;
 use crate::interpret_num::*;
+use crate::interpret_cond::*;
 use crate::lexer::*;
 
 pub fn parse(program: String) -> Expr {
@@ -25,6 +26,7 @@ fn parse_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Expr {
         TokenKind::Number => Expr::NumExpr(Num::Literal(tokens.next().unwrap().text.parse::<i32>().unwrap())),
         TokenKind::Boolean => Expr::BoolExpr(Bool::Literal(tokens.next().unwrap().text.parse::<bool>().unwrap())),
         TokenKind::OpenParen => match tokens.peek_nth(1).unwrap().kind {
+            TokenKind::Cond => Expr::CondExpr(parse_cond_expr(tokens)),
             TokenKind::Plus | TokenKind::Minus | TokenKind::Slash | TokenKind::Star => Expr::NumExpr(parse_num_expr(tokens)),
             TokenKind::Ampersand | TokenKind::Pipe | TokenKind::Bang | TokenKind::LessThan | TokenKind::Equal | TokenKind::GreaterThan => {
                 Expr::BoolExpr(parse_bool_expr(tokens))
@@ -91,4 +93,32 @@ fn parse_cmp_bool_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Bool {
     tokens.next();
 
     Bool::Cmp(Box::new(CmpBoolExpr { op, left, right }))
+}
+
+fn parse_cond_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Cond {
+    tokens.next(); // '('
+    tokens.next(); // 'cond'
+
+    // Does not contain a case.
+    if tokens.peek().unwrap().kind == TokenKind::CloseParen {
+        panic!("No case in cond.");
+    }
+
+    let mut cases: Vec<CondCase> = Vec::new(); 
+    while tokens.peek().unwrap().kind != TokenKind::CloseParen {
+        cases.push(parse_cond_case(tokens));
+    }
+
+    tokens.next();
+
+    Cond { cases } 
+}
+
+fn parse_cond_case(tokens: &mut PeekNth<TokenIter<'_>>) -> CondCase {
+    tokens.next();
+    let condition = parse_bool_expr(tokens);
+    let result = parse_expr(tokens);
+    tokens.next();
+
+    CondCase { condition, result }
 }
