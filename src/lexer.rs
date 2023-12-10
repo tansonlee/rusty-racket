@@ -11,6 +11,9 @@ pub enum TokenKind {
 
     // Keywords
     Cond,
+    Define,
+
+    Identifier,
 
     // Special characters
     OpenParen,
@@ -137,16 +140,23 @@ fn token_from_position(s: &mut std::iter::Peekable<std::str::Chars>) -> Token {
                 text: buff,
             };
         }
-
         if buff == "cond" {
             return Token {
                 kind: TokenKind::Cond,
                 text: buff,
             }
         }
+        if buff == "define" {
+            return Token {
+                kind: TokenKind::Define,
+                text: buff,
+            }
+        }
 
-        println!("{}", buff);
-        panic!("Unknown keyword");
+        return Token {
+            kind: TokenKind::Identifier,
+            text: buff,
+        };
     }
 
     match s.next().unwrap() {

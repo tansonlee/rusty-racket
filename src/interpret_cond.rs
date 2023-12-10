@@ -13,11 +13,11 @@ pub struct CondCase {
     pub result: Expr,
 }
 
-pub fn interpret_cond_expr(expr: Cond) -> Result {
-    for case in expr.cases.into_iter() {
-        let condition_result = interpret_bool_expr(case.condition);
+pub fn interpret_cond_expr(expr: &Cond) -> Value {
+    for case in &expr.cases {
+        let condition_result = interpret_bool_expr(&case.condition);
         if condition_result {
-            return interpret(case.result);
+            return interpret(&case.result);
         }
     }
 

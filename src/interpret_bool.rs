@@ -47,47 +47,47 @@ pub struct CmpBoolExpr {
     pub right: Num,
 }
 
-pub fn interpret_bool_expr(expr: Bool) -> B {
+pub fn interpret_bool_expr(expr: &Bool) -> B {
     match expr {
-        Bool::Literal(x) => x,
-        Bool::Binary(x) => interpret_binary_bool_expr(*x),
-        Bool::Unary(x) => interpret_unary_bool_expr(*x),
-        Bool::Cmp(x) => interpret_cmp_bool_expr(*x),
+        Bool::Literal(x) => *x,
+        Bool::Binary(x) => interpret_binary_bool_expr(&x),
+        Bool::Unary(x) => interpret_unary_bool_expr(&x),
+        Bool::Cmp(x) => interpret_cmp_bool_expr(&x),
     }
 }
 
-fn interpret_binary_bool_expr(expr: BinaryBoolExpr) -> B {
+fn interpret_binary_bool_expr(expr: &BinaryBoolExpr) -> B {
     match expr.op {
         BinaryBoolOp::And => {
-            let left = interpret_bool_expr(expr.left);
+            let left = interpret_bool_expr(&expr.left);
             // Short circuit.
             if left == false {
                 return false;
             }
-            let right = interpret_bool_expr(expr.right);
+            let right = interpret_bool_expr(&expr.right);
             left && right
         }
         BinaryBoolOp::Or => {
-            let left = interpret_bool_expr(expr.left);
+            let left = interpret_bool_expr(&expr.left);
             // Short circuit.
             if left == true {
                 return true;
             }
-            let right = interpret_bool_expr(expr.right);
+            let right = interpret_bool_expr(&expr.right);
             left || right
         }
     }
 }
 
-fn interpret_unary_bool_expr(expr: UnaryBoolExpr) -> B {
+fn interpret_unary_bool_expr(expr: &UnaryBoolExpr) -> B {
     match expr.op {
-        UnaryBoolOp::Not => !interpret_bool_expr(expr.value),
+        UnaryBoolOp::Not => !interpret_bool_expr(&expr.value),
     }
 }
 
-fn interpret_cmp_bool_expr(expr: CmpBoolExpr) -> B {
-    let left = interpret_num_expr(expr.left);
-    let right = interpret_num_expr(expr.right);
+fn interpret_cmp_bool_expr(expr: &CmpBoolExpr) -> B {
+    let left = interpret_num_expr(&expr.left);
+    let right = interpret_num_expr(&expr.right);
 
     match expr.op {
         CmpBoolOp::Lt => left < right,

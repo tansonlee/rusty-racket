@@ -3,8 +3,10 @@ use itertools::PeekNth;
 
 use crate::interpret::*;
 use crate::interpret_bool::*;
+use crate::interpret_function::Function;
 use crate::interpret_num::*;
 use crate::interpret_cond::*;
+use crate::interpret_variable::*;
 use crate::lexer::*;
 
 pub fn parse(program: String) -> Expr {
@@ -22,10 +24,12 @@ pub fn parse(program: String) -> Expr {
 
 fn parse_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Expr {
     match tokens.peek().unwrap().kind {
+        TokenKind::Identifier => Expr::VariableExpr(parse_variable_expr(tokens)),
         TokenKind::Minus => Expr::NumExpr(parse_num_expr(tokens)),
         TokenKind::Number => Expr::NumExpr(Num::Literal(tokens.next().unwrap().text.parse::<i32>().unwrap())),
         TokenKind::Boolean => Expr::BoolExpr(Bool::Literal(tokens.next().unwrap().text.parse::<bool>().unwrap())),
         TokenKind::OpenParen => match tokens.peek_nth(1).unwrap().kind {
+            TokenKind::Define => Expr::FunctionExpr(parse_function_expr(tokens)),
             TokenKind::Cond => Expr::CondExpr(parse_cond_expr(tokens)),
             TokenKind::Plus | TokenKind::Minus | TokenKind::Slash | TokenKind::Star => Expr::NumExpr(parse_num_expr(tokens)),
             TokenKind::Ampersand | TokenKind::Pipe | TokenKind::Bang | TokenKind::LessThan | TokenKind::Equal | TokenKind::GreaterThan => {
@@ -121,4 +125,36 @@ fn parse_cond_case(tokens: &mut PeekNth<TokenIter<'_>>) -> CondCase {
     tokens.next();
 
     CondCase { condition, result }
+}
+
+fn parse_variable_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Variable {
+    Variable { name: tokens.next().unwrap().text.to_string() }
+}
+
+/*
+(define (add a b) (+ a b))
+*/
+fn parse_function_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Function {
+    println!("PARSE FUNCTION");
+    tokens.next(); // '('
+    tokens.next(); // 'define'
+    tokens.next(); // '('
+    let function_name = &tokens.next().unwrap().text;
+
+    println!("fn name is {}", function_name);
+
+    let mut function_parameters = Vec::new();
+    while tokens.peek().unwrap().kind == TokenKind::Identifier {
+        function_parameters.push(tokens.next().unwrap().text.to_string());
+    }
+     println!("params are {:?}", function_parameters);
+
+    tokens.next(); // ')'
+     println!("token rest is {:?}", tokens);
+
+    let function_body = parse_expr(tokens);
+     println!("body are {:?}", function_body);
+    tokens.next(); // ')'
+
+    Function { name: function_name.to_string(), parameters: function_parameters, body: Box::new(function_body) }
 }
