@@ -1,4 +1,4 @@
-use crate::interpret::N;
+use crate::interpret::{Environment, N, interpret};
 
 #[derive(PartialEq, Debug)]
 pub enum BinaryNumOp {
@@ -21,25 +21,25 @@ pub struct BinaryNumExpr {
     pub right: Num,
 }
 
-pub fn interpret_num_expr(expr: &Num) -> N {
+pub fn interpret_num_expr(expr: &Num, env: &mut Environment) -> N {
     match expr {
         Num::Literal(x) => *x,
-        Num::Binary(x) => interpret_binary_num_expr(&*x),
+        Num::Binary(x) => interpret_binary_num_expr(&*x, env),
     }
 }
 
-fn interpret_binary_num_expr(expr: &BinaryNumExpr) -> N {
+fn interpret_binary_num_expr(expr: &BinaryNumExpr, env: &mut Environment) -> N {
     let left = {
         match &expr.left {
             Num::Literal(x) => x.clone(),
-            Num::Binary(x) => interpret_binary_num_expr(&*x),
+            Num::Binary(x) => interpret_binary_num_expr(&*x, env),
         }
     };
 
     let right = {
         match &expr.right {
             Num::Literal(x) => x.clone(),
-            Num::Binary(x) => interpret_binary_num_expr(&*x),
+            Num::Binary(x) => interpret_binary_num_expr(&*x, env),
         }
     };
 

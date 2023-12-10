@@ -3,9 +3,9 @@ use itertools::PeekNth;
 
 use crate::interpret::*;
 use crate::interpret_bool::*;
+use crate::interpret_cond::*;
 use crate::interpret_function::Function;
 use crate::interpret_num::*;
-use crate::interpret_cond::*;
 use crate::interpret_variable::*;
 use crate::lexer::*;
 
@@ -108,14 +108,14 @@ fn parse_cond_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Cond {
         panic!("No case in cond.");
     }
 
-    let mut cases: Vec<CondCase> = Vec::new(); 
+    let mut cases: Vec<CondCase> = Vec::new();
     while tokens.peek().unwrap().kind != TokenKind::CloseParen {
         cases.push(parse_cond_case(tokens));
     }
 
     tokens.next();
 
-    Cond { cases } 
+    Cond { cases }
 }
 
 fn parse_cond_case(tokens: &mut PeekNth<TokenIter<'_>>) -> CondCase {
@@ -128,7 +128,9 @@ fn parse_cond_case(tokens: &mut PeekNth<TokenIter<'_>>) -> CondCase {
 }
 
 fn parse_variable_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Variable {
-    Variable { name: tokens.next().unwrap().text.to_string() }
+    Variable {
+        name: tokens.next().unwrap().text.to_string(),
+    }
 }
 
 /*
@@ -147,14 +149,18 @@ fn parse_function_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Function {
     while tokens.peek().unwrap().kind == TokenKind::Identifier {
         function_parameters.push(tokens.next().unwrap().text.to_string());
     }
-     println!("params are {:?}", function_parameters);
+    println!("params are {:?}", function_parameters);
 
     tokens.next(); // ')'
-     println!("token rest is {:?}", tokens);
+    println!("token rest is {:?}", tokens);
 
     let function_body = parse_expr(tokens);
-     println!("body are {:?}", function_body);
+    println!("body are {:?}", function_body);
     tokens.next(); // ')'
 
-    Function { name: function_name.to_string(), parameters: function_parameters, body: Box::new(function_body) }
+    Function {
+        name: function_name.to_string(),
+        parameters: function_parameters,
+        body: Box::new(function_body),
+    }
 }

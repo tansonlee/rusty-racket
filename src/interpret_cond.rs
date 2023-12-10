@@ -1,4 +1,3 @@
-
 use crate::interpret::*;
 use crate::interpret_bool::*;
 
@@ -13,11 +12,11 @@ pub struct CondCase {
     pub result: Expr,
 }
 
-pub fn interpret_cond_expr(expr: &Cond) -> Value {
+pub fn interpret_cond_expr(expr: &Cond, env: &mut Environment) -> Value {
     for case in &expr.cases {
-        let condition_result = interpret_bool_expr(&case.condition);
+        let condition_result = interpret_bool_expr(&case.condition, env);
         if condition_result {
-            return interpret(&case.result);
+            return interpret(&case.result, env);
         }
     }
 

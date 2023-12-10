@@ -144,13 +144,13 @@ fn token_from_position(s: &mut std::iter::Peekable<std::str::Chars>) -> Token {
             return Token {
                 kind: TokenKind::Cond,
                 text: buff,
-            }
+            };
         }
         if buff == "define" {
             return Token {
                 kind: TokenKind::Define,
                 text: buff,
-            }
+            };
         }
 
         return Token {
