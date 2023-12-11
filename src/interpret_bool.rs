@@ -4,6 +4,7 @@ use crate::interpret_num::*;
 #[derive(Debug)]
 pub enum Bool {
     Literal(B),
+    Variable(V),
     Binary(Box<BinaryBoolExpr>),
     Unary(Box<UnaryBoolExpr>),
     Cmp(Box<CmpBoolExpr>),
@@ -50,9 +51,20 @@ pub struct CmpBoolExpr {
 pub fn interpret_bool_expr(expr: &Bool, env: &mut Environment) -> B {
     match expr {
         Bool::Literal(x) => *x,
+        Bool::Variable(x) => interpret_variable_bool_expr(&x, env),
         Bool::Binary(x) => interpret_binary_bool_expr(&x, env),
         Bool::Unary(x) => interpret_unary_bool_expr(&x, env),
         Bool::Cmp(x) => interpret_cmp_bool_expr(&x, env),
+    }
+}
+
+fn interpret_variable_bool_expr(expr: &V, env: &mut Environment) -> B {
+    match env.variable_map.get(expr) {
+        Some(x) => match x {
+            Value::Bool(y) => *y,
+            Value::Num(_) => panic!("Variable expected to be a number. Got a boolean.")
+        },
+        None => panic!("Undefined variable")
     }
 }
 
