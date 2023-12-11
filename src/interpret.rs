@@ -8,6 +8,7 @@ use crate::interpret_variable::*;
 
 pub type N = i32;
 pub type B = bool;
+pub type V = String;
 
 #[derive(PartialEq, Debug, Clone)]
 pub enum Value {

@@ -107,7 +107,16 @@ fn interpret_function() {
 #[test]
 fn interpret_variable() {
     let mut env = Environment {variable_map: HashMap::from([
-        ("a".to_string(), Value::Num(10))
+        ("a".to_string(), Value::Num(10)),
+        ("b".to_string(), Value::Num(5)),
     ])};
     assert_eq!(interpret(&parse("a".to_string()), &mut env), Value::Num(10));
+    assert_eq!(interpret(&parse("(+ a b)".to_string()), &mut env), Value::Num(15));
+    assert_eq!(interpret(&parse("(+ a b)".to_string()), &mut env), Value::Num(15));
+    let cond = "
+    (cond
+        ((= a 5) 1)
+        ((= b 5) 2)
+    )";
+    assert_eq!(interpret(&parse(cond.to_string()), &mut env), Value::Num(2));
 }

@@ -1,4 +1,4 @@
-use crate::interpret::{Environment, N, interpret};
+use crate::interpret::{Environment, N, V, Value};
 
 #[derive(PartialEq, Debug)]
 pub enum BinaryNumOp {
@@ -11,6 +11,7 @@ pub enum BinaryNumOp {
 #[derive(Debug)]
 pub enum Num {
     Literal(N),
+    Variable(V),
     Binary(Box<BinaryNumExpr>),
 }
 
@@ -24,24 +25,14 @@ pub struct BinaryNumExpr {
 pub fn interpret_num_expr(expr: &Num, env: &mut Environment) -> N {
     match expr {
         Num::Literal(x) => *x,
-        Num::Binary(x) => interpret_binary_num_expr(&*x, env),
+        Num::Binary(x) => interpret_binary_num_expr(x, env),
+        Num::Variable(x) => interpret_variable_num_expr(x, env),
     }
 }
 
 fn interpret_binary_num_expr(expr: &BinaryNumExpr, env: &mut Environment) -> N {
-    let left = {
-        match &expr.left {
-            Num::Literal(x) => x.clone(),
-            Num::Binary(x) => interpret_binary_num_expr(&*x, env),
-        }
-    };
-
-    let right = {
-        match &expr.right {
-            Num::Literal(x) => x.clone(),
-            Num::Binary(x) => interpret_binary_num_expr(&*x, env),
-        }
-    };
+    let left = interpret_num_expr(&expr.left, env);
+    let right = interpret_num_expr(&expr.right, env);
 
     // Division by zero!
     if (expr.op == BinaryNumOp::Div) && (right == 0) {
@@ -53,5 +44,15 @@ fn interpret_binary_num_expr(expr: &BinaryNumExpr, env: &mut Environment) -> N {
         BinaryNumOp::Sub => left - right,
         BinaryNumOp::Mul => left * right,
         BinaryNumOp::Div => left / right,
+    }
+}
+
+fn interpret_variable_num_expr(expr: &V, env: &mut Environment) -> N {
+    match env.variable_map.get(expr) {
+        Some(x) => match x {
+            Value::Num(y) => *y,
+            Value::Bool(_) => panic!("Variable expected to be a number. Got a boolean.")
+        },
+        None => panic!("Undefined variable")
     }
 }

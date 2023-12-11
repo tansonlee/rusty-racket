@@ -44,6 +44,7 @@ fn parse_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Expr {
 fn parse_num_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Num {
     match tokens.peek().unwrap().kind {
         TokenKind::Number => Num::Literal(tokens.next().unwrap().text.parse::<N>().unwrap()),
+        TokenKind::Identifier => Num::Variable(tokens.next().unwrap().text.parse::<V>().unwrap()),
         // Do nth(1) because the negative sign needs to be consumed.
         TokenKind::Minus => Num::Literal(-tokens.nth(1).unwrap().text.parse::<N>().unwrap()),
         _ => {
@@ -61,6 +62,7 @@ fn parse_num_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Num {
 fn parse_bool_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Bool {
     match tokens.peek().unwrap().kind {
         TokenKind::Boolean => Bool::Literal(tokens.next().unwrap().text.parse::<B>().unwrap()),
+        TokenKind::Identifier => Bool::Variable(tokens.next().unwrap().text.parse::<V>().unwrap()),
         _ => match tokens.peek_nth(1).unwrap().kind {
             TokenKind::Ampersand | TokenKind::Pipe => parse_binary_bool_expr(tokens),
             TokenKind::Bang => parse_unary_bool_expr(tokens),
