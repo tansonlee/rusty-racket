@@ -7,7 +7,10 @@ pub struct Variable {
 
 pub fn interpret_variable_expr(variable: &Variable, env: &mut Environment) -> Value {
     match env.variable_map.get(&variable.name) {
-        Some(x) => x.clone(),
-        None => panic!("Undefined variable")
+        Some(x) => match &x[..] {
+            [val, ..] => val.clone(),
+            _ => panic!("Val not found"),
+        },
+        None => panic!("Undefined variable"),
     }
 }

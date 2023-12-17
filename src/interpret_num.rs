@@ -1,4 +1,4 @@
-use crate::interpret::{Environment, N, V, Value};
+use crate::interpret::{Environment, Value, N, V};
 
 #[derive(PartialEq, Debug)]
 pub enum BinaryNumOp {
@@ -49,10 +49,11 @@ fn interpret_binary_num_expr(expr: &BinaryNumExpr, env: &mut Environment) -> N {
 
 fn interpret_variable_num_expr(expr: &V, env: &mut Environment) -> N {
     match env.variable_map.get(expr) {
-        Some(x) => match x {
-            Value::Num(y) => *y,
-            Value::Bool(_) => panic!("Variable expected to be a number. Got a boolean.")
+        Some(x) => match x[..] {
+            [Value::Num(y), ..] => y,
+            [Value::Bool(_), ..] => panic!("Variable expected to be a number. Got a boolean."),
+            _ => panic!("Couldn't find value for variable"),
         },
-        None => panic!("Undefined variable")
+        None => panic!("Undefined variable"),
     }
 }

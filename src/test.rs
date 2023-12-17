@@ -6,12 +6,16 @@ use crate::parser::parse;
 fn empty_map() -> Environment {
     Environment {
         variable_map: HashMap::new(),
+        functions: HashMap::new(),
     }
 }
 
 #[test]
 fn number_literal() {
-    assert_eq!(interpret(&parse("1010101".to_string()), &mut empty_map()), Value::Num(1010101));
+    assert_eq!(
+        interpret(&parse("1010101".to_string()), &mut empty_map()),
+        Value::Num(1010101)
+    );
     assert_eq!(interpret(&parse("0".to_string()), &mut empty_map()), Value::Num(0));
     assert_eq!(interpret(&parse("0010".to_string()), &mut empty_map()), Value::Num(10));
     assert_eq!(interpret(&parse("-10".to_string()), &mut empty_map()), Value::Num(-10));
@@ -28,8 +32,14 @@ fn boolean_literal() {
 #[test]
 fn interpret_number_expr() {
     assert_eq!(interpret(&parse("(+ 1 2)".to_string()), &mut empty_map()), Value::Num(3));
-    assert_eq!(interpret(&parse("(+ (- 5 1) 2)".to_string()), &mut empty_map()), Value::Num(6));
-    assert_eq!(interpret(&parse("(+ (- 5 1) (/ 10 5))".to_string()), &mut empty_map()), Value::Num(6));
+    assert_eq!(
+        interpret(&parse("(+ (- 5 1) 2)".to_string()), &mut empty_map()),
+        Value::Num(6)
+    );
+    assert_eq!(
+        interpret(&parse("(+ (- 5 1) (/ 10 5))".to_string()), &mut empty_map()),
+        Value::Num(6)
+    );
     assert_eq!(
         interpret(&parse("(+ 1 (+ 1 (+ 1 (+ 1 (+ 1 (+ 1 0))))))".to_string()), &mut empty_map()),
         Value::Num(6)
@@ -38,7 +48,10 @@ fn interpret_number_expr() {
 
 #[test]
 fn interpret_binary_boolean_expr() {
-    assert_eq!(interpret(&parse("(& true false)".to_string()), &mut empty_map()), Value::Bool(false));
+    assert_eq!(
+        interpret(&parse("(& true false)".to_string()), &mut empty_map()),
+        Value::Bool(false)
+    );
     assert_eq!(
         interpret(&parse("(& (| false true) (| false true))".to_string()), &mut empty_map()),
         Value::Bool(true)
@@ -47,8 +60,14 @@ fn interpret_binary_boolean_expr() {
 
 #[test]
 fn interpret_unary_boolean_expr() {
-    assert_eq!(interpret(&parse("(! false)".to_string()), &mut empty_map()), Value::Bool(true));
-    assert_eq!(interpret(&parse("(! true)".to_string()), &mut empty_map()), Value::Bool(false));
+    assert_eq!(
+        interpret(&parse("(! false)".to_string()), &mut empty_map()),
+        Value::Bool(true)
+    );
+    assert_eq!(
+        interpret(&parse("(! true)".to_string()), &mut empty_map()),
+        Value::Bool(false)
+    );
 }
 
 #[test]
@@ -58,7 +77,10 @@ fn interpret_cmp_boolean_expr() {
         Value::Bool(true)
     );
     assert_eq!(interpret(&parse("(< 3 10)".to_string()), &mut empty_map()), Value::Bool(true));
-    assert_eq!(interpret(&parse("(> 3 10)".to_string()), &mut empty_map()), Value::Bool(false));
+    assert_eq!(
+        interpret(&parse("(> 3 10)".to_string()), &mut empty_map()),
+        Value::Bool(false)
+    );
     assert_eq!(
         interpret(&parse("(| (< 5 10) (< 10 5))".to_string()), &mut empty_map()),
         Value::Bool(true)
@@ -106,10 +128,13 @@ fn interpret_function() {
 
 #[test]
 fn interpret_variable() {
-    let mut env = Environment {variable_map: HashMap::from([
-        ("a".to_string(), Value::Num(10)),
-        ("b".to_string(), Value::Num(5)),
-    ])};
+    let mut env = Environment {
+        variable_map: HashMap::from([
+            ("a".to_string(), Vec::from([Value::Num(10)])),
+            ("b".to_string(), Vec::from([Value::Num(5)])),
+        ]),
+        functions: HashMap::new(),
+    };
     assert_eq!(interpret(&parse("a".to_string()), &mut env), Value::Num(10));
     assert_eq!(interpret(&parse("(+ a b)".to_string()), &mut env), Value::Num(15));
     assert_eq!(interpret(&parse("(+ a b)".to_string()), &mut env), Value::Num(15));

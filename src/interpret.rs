@@ -26,8 +26,14 @@ pub enum Expr {
 }
 
 #[derive(Debug)]
+pub struct FunctionInfo {
+    pub parameter_names: Vec<String>,
+}
+
+#[derive(Debug)]
 pub struct Environment {
-    pub variable_map: HashMap<String, Value>,
+    pub variable_map: HashMap<String, Vec<Value>>,
+    pub functions: HashMap<String, FunctionInfo>,
 }
 
 pub fn interpret(expr: &Expr, env: &mut Environment) -> Value {

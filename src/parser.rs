@@ -32,9 +32,12 @@ fn parse_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Expr {
             TokenKind::Define => Expr::FunctionExpr(parse_function_expr(tokens)),
             TokenKind::Cond => Expr::CondExpr(parse_cond_expr(tokens)),
             TokenKind::Plus | TokenKind::Minus | TokenKind::Slash | TokenKind::Star => Expr::NumExpr(parse_num_expr(tokens)),
-            TokenKind::Ampersand | TokenKind::Pipe | TokenKind::Bang | TokenKind::LessThan | TokenKind::Equal | TokenKind::GreaterThan => {
-                Expr::BoolExpr(parse_bool_expr(tokens))
-            }
+            TokenKind::Ampersand
+            | TokenKind::Pipe
+            | TokenKind::Bang
+            | TokenKind::LessThan
+            | TokenKind::Equal
+            | TokenKind::GreaterThan => Expr::BoolExpr(parse_bool_expr(tokens)),
             _ => panic!("Invalid expression starting with an open parenthesis '('"),
         },
         _ => panic!("Malformed expression, expression begins with an illegal character."),
@@ -162,7 +165,5 @@ fn parse_function_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Function {
 
     Function {
         name: function_name.to_string(),
-        parameters: function_parameters,
-        body: Box::new(function_body),
     }
 }

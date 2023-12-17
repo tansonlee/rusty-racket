@@ -60,11 +60,12 @@ pub fn interpret_bool_expr(expr: &Bool, env: &mut Environment) -> B {
 
 fn interpret_variable_bool_expr(expr: &V, env: &mut Environment) -> B {
     match env.variable_map.get(expr) {
-        Some(x) => match x {
-            Value::Bool(y) => *y,
-            Value::Num(_) => panic!("Variable expected to be a number. Got a boolean.")
+        Some(x) => match x[..] {
+            [Value::Bool(y), ..] => y,
+            [Value::Num(_), ..] => panic!("Variable expected to be a number. Got a boolean."),
+            _ => panic!("Couldn't find value for variable"),
         },
-        None => panic!("Undefined variable")
+        None => panic!("Undefined variable"),
     }
 }
 
