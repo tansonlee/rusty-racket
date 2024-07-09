@@ -12,11 +12,11 @@ pub struct CondCase {
     pub result: Expr,
 }
 
-pub fn interpret_cond_expr(expr: &Cond, env: &mut Environment) -> Value {
+pub fn interpret_cond_expr(expr: &Cond, variable_map: &mut VariableMap, function_map: &FunctionMap) -> Value {
     for case in &expr.cases {
-        let condition_result = interpret_bool_expr(&case.condition, env);
+        let condition_result = interpret_bool_expr(&case.condition, variable_map);
         if condition_result {
-            return interpret(&case.result, env);
+            return interpret(&case.result, variable_map, function_map);
         }
     }
 

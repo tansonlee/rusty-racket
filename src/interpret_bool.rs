@@ -48,18 +48,18 @@ pub struct CmpBoolExpr {
     pub right: Num,
 }
 
-pub fn interpret_bool_expr(expr: &Bool, env: &mut Environment) -> B {
+pub fn interpret_bool_expr(expr: &Bool, variable_map: &VariableMap) -> B {
     match expr {
         Bool::Literal(x) => *x,
-        Bool::Variable(x) => interpret_variable_bool_expr(&x, env),
-        Bool::Binary(x) => interpret_binary_bool_expr(&x, env),
-        Bool::Unary(x) => interpret_unary_bool_expr(&x, env),
-        Bool::Cmp(x) => interpret_cmp_bool_expr(&x, env),
+        Bool::Variable(x) => interpret_variable_bool_expr(&x, variable_map),
+        Bool::Binary(x) => interpret_binary_bool_expr(&x, variable_map),
+        Bool::Unary(x) => interpret_unary_bool_expr(&x, variable_map),
+        Bool::Cmp(x) => interpret_cmp_bool_expr(&x, variable_map),
     }
 }
 
-fn interpret_variable_bool_expr(expr: &V, env: &mut Environment) -> B {
-    match env.variable_map.get(expr) {
+fn interpret_variable_bool_expr(expr: &V, variable_map: &VariableMap) -> B {
+    match variable_map.get(expr) {
         Some(x) => match x[..] {
             [Value::Bool(y), ..] => y,
             [Value::Num(_), ..] => panic!("Variable expected to be a number. Got a boolean."),
@@ -69,38 +69,38 @@ fn interpret_variable_bool_expr(expr: &V, env: &mut Environment) -> B {
     }
 }
 
-fn interpret_binary_bool_expr(expr: &BinaryBoolExpr, env: &mut Environment) -> B {
+fn interpret_binary_bool_expr(expr: &BinaryBoolExpr, variable_map: &VariableMap) -> B {
     match expr.op {
         BinaryBoolOp::And => {
-            let left = interpret_bool_expr(&expr.left, env);
+            let left = interpret_bool_expr(&expr.left, variable_map);
             // Short circuit.
             if left == false {
                 return false;
             }
-            let right = interpret_bool_expr(&expr.right, env);
+            let right = interpret_bool_expr(&expr.right, variable_map);
             left && right
         }
         BinaryBoolOp::Or => {
-            let left = interpret_bool_expr(&expr.left, env);
+            let left = interpret_bool_expr(&expr.left, variable_map);
             // Short circuit.
             if left == true {
                 return true;
             }
-            let right = interpret_bool_expr(&expr.right, env);
+            let right = interpret_bool_expr(&expr.right, variable_map);
             left || right
         }
     }
 }
 
-fn interpret_unary_bool_expr(expr: &UnaryBoolExpr, env: &mut Environment) -> B {
+fn interpret_unary_bool_expr(expr: &UnaryBoolExpr, variable_map: &VariableMap) -> B {
     match expr.op {
-        UnaryBoolOp::Not => !interpret_bool_expr(&expr.value, env),
+        UnaryBoolOp::Not => !interpret_bool_expr(&expr.value, variable_map),
     }
 }
 
-fn interpret_cmp_bool_expr(expr: &CmpBoolExpr, env: &mut Environment) -> B {
-    let left = interpret_num_expr(&expr.left, env);
-    let right = interpret_num_expr(&expr.right, env);
+fn interpret_cmp_bool_expr(expr: &CmpBoolExpr, variable_map: &VariableMap) -> B {
+    let left = interpret_num_expr(&expr.left, variable_map);
+    let right = interpret_num_expr(&expr.right, variable_map);
 
     match expr.op {
         CmpBoolOp::Lt => left < right,

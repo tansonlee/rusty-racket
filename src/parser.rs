@@ -165,5 +165,7 @@ fn parse_function_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Function {
 
     Function {
         name: function_name.to_string(),
+        parameters: function_parameters,
+        body: Box::new(function_body),
     }
 }

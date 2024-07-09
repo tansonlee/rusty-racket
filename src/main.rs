@@ -10,7 +10,6 @@ mod interpret_variable;
 mod lexer;
 mod parser;
 
-use crate::interpret::interpret;
 use crate::parser::*;
 
 fn main() {

@@ -3,8 +3,11 @@ use std::collections::HashMap;
 use crate::interpret_bool::*;
 use crate::interpret_cond::*;
 use crate::interpret_function::*;
+use crate::interpret_function_call::interpret_function_call;
+use crate::interpret_function_call::FunctionCall;
 use crate::interpret_num::*;
 use crate::interpret_variable::*;
+use crate::parser::parse;
 
 pub type N = i32;
 pub type B = bool;
@@ -23,11 +26,13 @@ pub enum Expr {
     CondExpr(Cond),
     FunctionExpr(Function),
     VariableExpr(Variable),
+    FunctionCallExpr(FunctionCall),
 }
 
 #[derive(Debug)]
 pub struct FunctionInfo {
     pub parameter_names: Vec<String>,
+    pub body: Expr,
 }
 
 #[derive(Debug)]
@@ -36,12 +41,35 @@ pub struct Environment {
     pub functions: HashMap<String, FunctionInfo>,
 }
 
-pub fn interpret(expr: &Expr, env: &mut Environment) -> Value {
+pub type VariableMap = HashMap<String, Vec<Value>>;
+pub type FunctionMap = HashMap<String, FunctionInfo>;
+
+fn parse_functions(program: &String) -> FunctionMap {
+    // 1. Separate each function.
+    // let function_strings = Vec::new();
+
+    // 2. Parse the parameter names.
+
+    // 3. Parse the function body.
+    HashMap::new()
+}
+
+pub fn interpret_program(program: String) -> Value {
+    // First interpret all of the functions to fill the function map.
+    let function_map = parse_functions(&program);
+
+    // Begin interpreting from the main function.
+    interpret(&parse(program), &mut HashMap::new(), &function_map)
+}
+
+pub fn interpret(expr: &Expr, variable_map: &mut VariableMap, function_map: &FunctionMap) -> Value {
     match expr {
-        Expr::NumExpr(x) => Value::Num(interpret_num_expr(&x, env)),
-        Expr::BoolExpr(x) => Value::Bool(interpret_bool_expr(&x, env)),
-        Expr::CondExpr(x) => interpret_cond_expr(&x, env),
-        Expr::FunctionExpr(x) => interpret_function_expr(&x, env),
-        Expr::VariableExpr(x) => interpret_variable_expr(&x, env),
+        Expr::NumExpr(x) => Value::Num(interpret_num_expr(&x, variable_map)),
+        Expr::BoolExpr(x) => Value::Bool(interpret_bool_expr(&x, variable_map)),
+        Expr::CondExpr(x) => interpret_cond_expr(&x, variable_map, function_map),
+        Expr::VariableExpr(x) => interpret_variable_expr(&x, variable_map),
+        Expr::FunctionCallExpr(x) => interpret_function_call(&x, variable_map, function_map),
+        // Function definitions should be interpreted in the previous pass.
+        Expr::FunctionExpr(_) => panic!("Encountered function expr"),
     }
 }
