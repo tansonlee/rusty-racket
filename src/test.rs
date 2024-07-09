@@ -68,7 +68,7 @@ fn interpret_cond_expr() {
       ((= 1 3) 2)
       ((= 1 1) 3))
     ";
-    assert_eq!(interpret_program(cond1.to_string()), Value::Num(3));
+    assert_eq!(interpret_program_snippet(cond1.to_string()), Value::Num(3));
 
     let cond2 = "
     (cond 
@@ -76,7 +76,7 @@ fn interpret_cond_expr() {
       ((= 5 18) 2)
       ((> 5 18) 3))
     ";
-    assert_eq!(interpret_program(cond2.to_string()), Value::Num(1));
+    assert_eq!(interpret_program_snippet(cond2.to_string()), Value::Num(1));
 }
 
 #[test]
@@ -97,6 +97,15 @@ fn interpret_function() {
     (define (main) 0)
     ";
     assert_eq!(interpret_program(program.to_string()), Value::Num(0));
+
+    let program2 = "
+    (define (main) 
+        (cond 
+            ((< 5 6) (+ 5 10))
+            ((= 1 1) (+ 50 100))))
+    ";
+
+    assert_eq!(interpret_program(program2.to_string()), Value::Num(15));
 }
 
 #[test]

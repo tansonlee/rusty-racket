@@ -1,6 +1,6 @@
 use crate::interpret::{Value, VariableMap, N, V};
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 pub enum BinaryNumOp {
     Add,
     Sub,
@@ -8,14 +8,14 @@ pub enum BinaryNumOp {
     Div,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Num {
     Literal(N),
     Variable(V),
     Binary(Box<BinaryNumExpr>),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct BinaryNumExpr {
     pub op: BinaryNumOp,
     pub left: Num,

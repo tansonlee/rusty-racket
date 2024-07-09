@@ -5,6 +5,7 @@ use crate::interpret::*;
 use crate::interpret_bool::*;
 use crate::interpret_cond::*;
 use crate::interpret_function::Function;
+use crate::interpret_function_call::FunctionCall;
 use crate::interpret_num::*;
 use crate::interpret_variable::*;
 use crate::lexer::*;
@@ -38,6 +39,7 @@ fn parse_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Expr {
             | TokenKind::LessThan
             | TokenKind::Equal
             | TokenKind::GreaterThan => Expr::BoolExpr(parse_bool_expr(tokens)),
+            TokenKind::Identifier => Expr::FunctionCallExpr(parse_function_call(tokens)),
             _ => panic!("Invalid expression starting with an open parenthesis '('"),
         },
         _ => panic!("Malformed expression, expression begins with an illegal character."),
@@ -142,30 +144,43 @@ fn parse_variable_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Variable {
 (define (add a b) (+ a b))
 */
 fn parse_function_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Function {
-    println!("PARSE FUNCTION");
     tokens.next(); // '('
     tokens.next(); // 'define'
     tokens.next(); // '('
     let function_name = &tokens.next().unwrap().text;
 
-    println!("fn name is {}", function_name);
-
     let mut function_parameters = Vec::new();
     while tokens.peek().unwrap().kind == TokenKind::Identifier {
         function_parameters.push(tokens.next().unwrap().text.to_string());
     }
-    println!("params are {:?}", function_parameters);
 
     tokens.next(); // ')'
-    println!("token rest is {:?}", tokens);
 
     let function_body = parse_expr(tokens);
-    println!("body are {:?}", function_body);
     tokens.next(); // ')'
 
     Function {
         name: function_name.to_string(),
         parameters: function_parameters,
         body: Box::new(function_body),
+    }
+}
+
+// (add 1 2) or (main)
+fn parse_function_call(tokens: &mut PeekNth<TokenIter<'_>>) -> FunctionCall {
+    tokens.next();
+
+    let name = &tokens.next().unwrap().text;
+
+    let mut arguments: Vec<Expr> = Vec::new();
+    while tokens.peek().unwrap().kind != TokenKind::CloseParen {
+        arguments.push(parse_expr(tokens));
+    }
+
+    tokens.next();
+
+    FunctionCall {
+        name: name.to_string(),
+        arguments,
     }
 }

@@ -1,7 +1,7 @@
 use crate::interpret::*;
 use crate::interpret_num::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Bool {
     Literal(B),
     Variable(V),
@@ -10,38 +10,38 @@ pub enum Bool {
     Cmp(Box<CmpBoolExpr>),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum BinaryBoolOp {
     And,
     Or,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum UnaryBoolOp {
     Not,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum CmpBoolOp {
     Lt,
     Eq,
     Gt,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct BinaryBoolExpr {
     pub op: BinaryBoolOp,
     pub left: Bool,
     pub right: Bool,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct UnaryBoolExpr {
     pub op: UnaryBoolOp,
     pub value: Bool,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CmpBoolExpr {
     pub op: CmpBoolOp,
     pub left: Num,

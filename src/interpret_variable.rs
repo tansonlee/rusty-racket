@@ -1,6 +1,6 @@
 use crate::interpret::{Value, VariableMap};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Variable {
     pub name: String,
 }

@@ -19,7 +19,7 @@ pub enum Value {
     Bool(B),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Expr {
     BoolExpr(Bool),
     NumExpr(Num),
@@ -47,11 +47,14 @@ pub type FunctionMap = HashMap<String, FunctionInfo>;
 fn parse_functions(program: &String) -> FunctionMap {
     // 1. Separate each function.
     // let function_strings = Vec::new();
-
-    // 2. Parse the parameter names.
-
-    // 3. Parse the function body.
-    HashMap::new()
+    let expr = parse(program.to_string());
+    if let Expr::FunctionExpr(function) = expr {
+        let mut function_map = HashMap::new();
+        interpret_function_expr(&function, &mut function_map);
+        function_map
+    } else {
+        panic!("Malformed program");
+    }
 }
 
 pub fn interpret_program(program: String) -> Value {
@@ -59,7 +62,11 @@ pub fn interpret_program(program: String) -> Value {
     let function_map = parse_functions(&program);
 
     // Begin interpreting from the main function.
-    interpret(&parse(program), &mut HashMap::new(), &function_map)
+    interpret(&parse("(main)".to_string()), &mut HashMap::new(), &function_map)
+}
+
+pub fn interpret_program_snippet(program: String) -> Value {
+    interpret(&parse(program.to_string()), &mut HashMap::new(), &HashMap::new())
 }
 
 pub fn interpret(expr: &Expr, variable_map: &mut VariableMap, function_map: &FunctionMap) -> Value {

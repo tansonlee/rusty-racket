@@ -1,12 +1,12 @@
 use crate::interpret::*;
 use crate::interpret_bool::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Cond {
     pub cases: Vec<CondCase>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CondCase {
     pub condition: Bool,
     pub result: Expr,

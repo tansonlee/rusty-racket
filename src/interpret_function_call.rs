@@ -1,6 +1,6 @@
 use crate::interpret::{interpret, Expr, FunctionMap, Value, VariableMap};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct FunctionCall {
     pub name: String,
     pub arguments: Vec<Expr>,
@@ -20,7 +20,10 @@ pub fn interpret_function_call(
     // Add the vars to the environment.
     for i in 0..argument_values.len() {
         let arg = argument_values.get(i).unwrap();
-        let name = &function_map[&function_call.name].parameter_names[i];
+        let name = &function_map
+            .get(&function_call.name)
+            .expect(&format!("Undefined function: '{}'", function_call.name))
+            .parameter_names[i];
 
         variable_map
             .entry(name.to_string())

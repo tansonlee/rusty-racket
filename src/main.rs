@@ -10,13 +10,16 @@ mod interpret_variable;
 mod lexer;
 mod parser;
 
-use crate::parser::*;
+use crate::interpret::interpret_program;
 
 fn main() {
     let program = "
-    (define (add a b) (+ a b))
+    (define (main) 
+        (cond 
+            ((< 5 6) (+ 5 10))
+            ((= 1 1) (+ 50 100))))
     ";
-    println!("{:?}", parse(program.to_string()));
+    println!("FINAL RESULT: {:?}", interpret_program(program.to_string()));
 }
 
 #[cfg(test)]
