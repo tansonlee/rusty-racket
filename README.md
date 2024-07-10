@@ -1,3 +1,3 @@
-# Interpreter for the Racket programming language written in Rust
+# Rusty Racket
 
-Making this project to learn rust.
+Interpreter for the Racket programming language written in Rust.
