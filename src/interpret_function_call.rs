@@ -25,10 +25,7 @@ pub fn interpret_function_call(
             .expect(&format!("Undefined function: '{}'", function_call.name))
             .parameter_names[i];
 
-        variable_map
-            .entry(name.to_string())
-            .or_insert(Vec::new())
-            .insert(0, arg.clone());
+        variable_map.entry(name.to_string()).or_insert(Vec::new()).push(arg.clone());
     }
 
     let function_body = &function_map.get(&function_call.name).clone().unwrap().body;

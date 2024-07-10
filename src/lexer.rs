@@ -1,3 +1,4 @@
+use std::fmt;
 use std::iter::Peekable;
 use std::str::Chars;
 
@@ -24,6 +25,7 @@ pub enum TokenKind {
     Minus,
     Slash,
     Star,
+    Percent,
 
     Ampersand,
     Pipe,
@@ -32,6 +34,12 @@ pub enum TokenKind {
     LessThan,
     Equal,
     GreaterThan,
+}
+
+impl fmt::Display for Token {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}({})", self.kind, self.text)
+    }
 }
 
 #[derive(PartialEq, Debug)]
@@ -80,6 +88,7 @@ pub fn token_kind_to_binary_num_op(kind: &TokenKind) -> BinaryNumOp {
         TokenKind::Minus => BinaryNumOp::Sub,
         TokenKind::Slash => BinaryNumOp::Div,
         TokenKind::Star => BinaryNumOp::Mul,
+        TokenKind::Percent => BinaryNumOp::Mod,
         _ => panic!("Could not parse token kind to binary num op"),
     }
 }
@@ -160,11 +169,11 @@ fn token_from_position(s: &mut std::iter::Peekable<std::str::Chars>) -> Token {
     }
 
     match s.next().unwrap() {
-        '(' => Token {
+        '(' | '[' => Token {
             kind: TokenKind::OpenParen,
             text: "(".to_string(),
         },
-        ')' => Token {
+        ')' | ']' => Token {
             kind: TokenKind::CloseParen,
             text: ")".to_string(),
         },
@@ -183,6 +192,10 @@ fn token_from_position(s: &mut std::iter::Peekable<std::str::Chars>) -> Token {
         '*' => Token {
             kind: TokenKind::Star,
             text: "*".to_string(),
+        },
+        '%' => Token {
+            kind: TokenKind::Percent,
+            text: "%".to_string(),
         },
         '&' => Token {
             kind: TokenKind::Ampersand,

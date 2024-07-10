@@ -14,7 +14,7 @@ pub struct CondCase {
 
 pub fn interpret_cond_expr(expr: &Cond, variable_map: &mut VariableMap, function_map: &FunctionMap) -> Value {
     for case in &expr.cases {
-        let condition_result = interpret_bool_expr(&case.condition, variable_map);
+        let condition_result = interpret_bool_expr(&case.condition, variable_map, function_map);
         if condition_result {
             return interpret(&case.result, variable_map, function_map);
         }
