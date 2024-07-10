@@ -25,13 +25,13 @@ pub struct BinaryNumExpr {
     pub right: Num,
 }
 
-pub fn interpret_num_expr(expr: &Num, mut variable_map: &mut VariableMap, function_map: &FunctionMap) -> N {
+pub fn interpret_num_expr(expr: &Num, variable_map: &mut VariableMap, function_map: &FunctionMap) -> N {
     match expr {
         Num::Literal(x) => *x,
         Num::Binary(x) => interpret_binary_num_expr(x, variable_map, function_map),
         Num::Variable(x) => interpret_variable_num_expr(x, variable_map),
         Num::FunctionCall(x) => {
-            if let Value::Num(x) = interpret_function_call(x, &mut variable_map, function_map) {
+            if let Value::Num(x) = interpret_function_call(x, variable_map, function_map) {
                 x
             } else {
                 panic!(

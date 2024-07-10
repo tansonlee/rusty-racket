@@ -50,13 +50,13 @@ pub struct CmpBoolExpr {
     pub right: Num,
 }
 
-pub fn interpret_bool_expr(expr: &Bool, mut variable_map: &mut VariableMap, function_map: &FunctionMap) -> B {
+pub fn interpret_bool_expr(expr: &Bool, variable_map: &mut VariableMap, function_map: &FunctionMap) -> B {
     match expr {
         Bool::Literal(x) => *x,
         Bool::Variable(x) => interpret_variable_bool_expr(&x, variable_map),
         Bool::Binary(x) => interpret_binary_bool_expr(&x, variable_map, function_map),
         Bool::Unary(x) => interpret_unary_bool_expr(&x, variable_map, function_map),
-        Bool::Cmp(x) => interpret_cmp_bool_expr(&x, &mut variable_map, function_map),
+        Bool::Cmp(x) => interpret_cmp_bool_expr(&x, variable_map, function_map),
         Bool::FunctionCall(x) => {
             if let Value::Bool(x) = interpret_function_call(&x, variable_map, function_map) {
                 x
