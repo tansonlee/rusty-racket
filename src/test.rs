@@ -168,6 +168,40 @@ fn interpret_variable() {
 }
 
 #[test]
+fn interpret_list() {
+    assert_eq!(
+        interpret_program_snippet("(list 1)".to_string()),
+        Value::List(ValueList::Node(ValueNode {
+            data: Box::new(Value::Num(1)),
+            next: Box::new(ValueList::Empty),
+        }))
+    );
+
+    assert_eq!(
+        interpret_program_snippet("(list 1 2)".to_string()),
+        Value::List(ValueList::Node(ValueNode {
+            data: Box::new(Value::Num(1)),
+            next: Box::new(ValueList::Node(ValueNode {
+                data: Box::new(Value::Num(2)),
+                next: Box::new(ValueList::Empty),
+            })),
+        }))
+    );
+
+    assert_eq!(interpret_program_snippet("empty".to_string()), Value::List(ValueList::Empty));
+
+    assert_eq!(
+        interpret_program_snippet("(cons 1 empty)".to_string()),
+        interpret_program_snippet("(list 1)".to_string())
+    );
+
+    assert_eq!(
+        interpret_program_snippet("(cons 1 (cons 2 empty))".to_string()),
+        interpret_program_snippet("(list 1 2)".to_string())
+    );
+}
+
+#[test]
 fn test_median() {
     let program = "
     (define (median a b c)

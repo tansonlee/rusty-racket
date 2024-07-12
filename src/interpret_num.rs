@@ -10,7 +10,7 @@ pub enum BinaryNumOp {
     Mod,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Num {
     Literal(N),
     Variable(V),
@@ -18,7 +18,7 @@ pub enum Num {
     FunctionCall(FunctionCall),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct BinaryNumExpr {
     pub op: BinaryNumOp,
     pub left: Num,

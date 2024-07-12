@@ -5,6 +5,7 @@ mod interpret_bool;
 mod interpret_cond;
 mod interpret_function;
 mod interpret_function_call;
+mod interpret_list;
 mod interpret_num;
 mod interpret_variable;
 mod lexer;
