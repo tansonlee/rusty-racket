@@ -6,6 +6,8 @@ use crate::interpret_bool::*;
 use crate::interpret_cond::*;
 use crate::interpret_function::Function;
 use crate::interpret_function_call::FunctionCall;
+use crate::interpret_list::List;
+use crate::interpret_list::Node;
 use crate::interpret_num::*;
 use crate::interpret_variable::*;
 use crate::lexer::*;
@@ -51,9 +53,15 @@ pub fn parse_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Expr {
         TokenKind::Minus => Expr::NumExpr(parse_num_expr(tokens)),
         TokenKind::Number => Expr::NumExpr(Num::Literal(tokens.next().unwrap().text.parse::<i32>().unwrap())),
         TokenKind::Boolean => Expr::BoolExpr(Bool::Literal(tokens.next().unwrap().text.parse::<bool>().unwrap())),
+        TokenKind::Empty => {
+            tokens.next();
+            Expr::EmptyExpr(List::Empty)
+        }
         TokenKind::OpenParen => match tokens.peek_nth(1).unwrap().kind {
             TokenKind::Define => Expr::FunctionExpr(parse_function_expr(tokens)),
             TokenKind::Cond => Expr::CondExpr(parse_cond_expr(tokens)),
+            TokenKind::List => Expr::ListExpr(parse_list_expr(tokens)),
+            TokenKind::Cons => Expr::ConsExpr(parse_cons_expr(tokens)),
             TokenKind::Plus | TokenKind::Minus | TokenKind::Slash | TokenKind::Star | TokenKind::Percent => {
                 Expr::NumExpr(parse_num_expr(tokens))
             }
@@ -66,7 +74,10 @@ pub fn parse_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Expr {
             TokenKind::Identifier => Expr::FunctionCallExpr(parse_function_call(tokens)),
             _ => panic!("Invalid expression starting with an open parenthesis '('"),
         },
-        _ => panic!("Malformed expression, expression begins with an illegal character."),
+        _ => panic!(
+            "Malformed expression, expression begins with an illegal character {}.",
+            tokens.peek().unwrap()
+        ),
     }
 }
 
@@ -191,6 +202,7 @@ fn parse_function_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Function {
     consume_close_paren(tokens);
 
     let function_body = parse_expr(tokens);
+
     consume_close_paren(tokens);
 
     Function {
@@ -217,4 +229,59 @@ fn parse_function_call(tokens: &mut PeekNth<TokenIter<'_>>) -> FunctionCall {
         name: name.to_string(),
         arguments,
     }
+}
+
+fn parse_list_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> List {
+    consume_open_paren(tokens);
+    assert_eq!(tokens.next().unwrap().kind, TokenKind::List);
+
+    let mut list_items = List::Empty;
+    let mut curr = &mut list_items;
+
+    while tokens.peek().unwrap().kind != TokenKind::CloseParen {
+        let expr = parse_expr(tokens);
+        let new_node = Node {
+            data: Box::new(expr),
+            next: Box::new(List::Empty),
+        };
+
+        match curr {
+            List::Empty => {
+                *curr = List::Node(new_node);
+            }
+            List::Node(ref mut node) => {
+                node.next = Box::new(List::Node(new_node));
+                curr = &mut node.next;
+            }
+        }
+    }
+
+    consume_close_paren(tokens);
+
+    list_items
+}
+
+// (cons 1 (cons 2 empty)) or (cons 1 empty)
+fn parse_cons_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> List {
+    consume_open_paren(tokens);
+    assert_eq!(tokens.next().unwrap().kind, TokenKind::Cons);
+
+    let first = parse_expr(tokens);
+    let rest = parse_expr(tokens);
+
+    consume_close_paren(tokens);
+
+    match rest {
+        Expr::EmptyExpr(_) => List::Node(Node {
+            data: Box::new(first),
+            next: Box::new(List::Empty),
+        }),
+        Expr::ConsExpr(x) => List::Node(Node {
+            data: Box::new(first),
+            next: Box::new(x),
+        }),
+        _ => panic!("Malformed cons expression"),
+    }
+
+    // List { data: Some(Box::new(first)), next: rest }
 }

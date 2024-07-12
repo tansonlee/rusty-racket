@@ -1,6 +1,6 @@
 use crate::interpret::{Expr, FunctionInfo, FunctionMap};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Function {
     pub name: String,
     pub parameters: Vec<String>,

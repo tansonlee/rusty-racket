@@ -2,7 +2,7 @@ use crate::interpret::*;
 use crate::interpret_function_call::{interpret_function_call, FunctionCall};
 use crate::interpret_num::*;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Bool {
     Literal(B),
     Variable(V),
@@ -12,38 +12,38 @@ pub enum Bool {
     FunctionCall(FunctionCall),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum BinaryBoolOp {
     And,
     Or,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum UnaryBoolOp {
     Not,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum CmpBoolOp {
     Lt,
     Eq,
     Gt,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct BinaryBoolExpr {
     pub op: BinaryBoolOp,
     pub left: Bool,
     pub right: Bool,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct UnaryBoolExpr {
     pub op: UnaryBoolOp,
     pub value: Bool,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct CmpBoolExpr {
     pub op: CmpBoolOp,
     pub left: Num,

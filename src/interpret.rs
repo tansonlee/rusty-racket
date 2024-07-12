@@ -8,20 +8,45 @@ use crate::interpret_cond::*;
 use crate::interpret_function::*;
 use crate::interpret_function_call::interpret_function_call;
 use crate::interpret_function_call::FunctionCall;
+use crate::interpret_list::interpret_list_expr;
+use crate::interpret_list::List;
 use crate::interpret_num::*;
 use crate::interpret_variable::*;
 use crate::lexer::string_to_tokens;
 use crate::lexer::TokenIter;
 use crate::parser::{parse, parse_expr};
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct ValueNode {
+    pub data: Box<Value>,
+    pub next: Box<ValueList>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ValueList {
+    Empty,
+    Node(ValueNode),
+}
+
 pub type N = i32;
 pub type B = bool;
+pub type L = ValueList;
 pub type V = String;
+
+impl fmt::Display for ValueList {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            ValueList::Empty => write!(f, "empty"),
+            ValueList::Node(node) => write!(f, "({:#?} -> {:#?})", node.data, node.next),
+        }
+    }
+}
 
 #[derive(PartialEq, Debug, Clone)]
 pub enum Value {
     Num(N),
     Bool(B),
+    List(L),
 }
 
 impl fmt::Display for Value {
@@ -29,11 +54,12 @@ impl fmt::Display for Value {
         match *self {
             Value::Num(ref n) => write!(f, "{}", n),
             Value::Bool(ref b) => write!(f, "{}", b),
+            Value::List(ref l) => write!(f, "{}", l),
         }
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Expr {
     BoolExpr(Bool),
     NumExpr(Num),
@@ -41,6 +67,9 @@ pub enum Expr {
     FunctionExpr(Function),
     VariableExpr(Variable),
     FunctionCallExpr(FunctionCall),
+    ListExpr(List),
+    ConsExpr(List),
+    EmptyExpr(List),
 }
 
 #[derive(Debug)]
@@ -93,6 +122,7 @@ pub fn interpret(expr: &Expr, variable_map: &mut VariableMap, function_map: &Fun
         Expr::CondExpr(x) => interpret_cond_expr(&x, variable_map, function_map),
         Expr::VariableExpr(x) => interpret_variable_expr(&x, variable_map),
         Expr::FunctionCallExpr(x) => interpret_function_call(&x, variable_map, function_map),
+        Expr::ListExpr(x) | Expr::ConsExpr(x) | Expr::EmptyExpr(x) => interpret_list_expr(&x, variable_map, function_map),
         // Function definitions should be interpreted in the previous pass.
         Expr::FunctionExpr(_) => panic!("Encountered function expr"),
     }

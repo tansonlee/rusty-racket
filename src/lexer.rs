@@ -13,6 +13,9 @@ pub enum TokenKind {
     // Keywords
     Cond,
     Define,
+    List,
+    Cons,
+    Empty,
 
     Identifier,
 
@@ -98,7 +101,6 @@ pub fn token_kind_to_binary_bool_op(kind: &TokenKind) -> BinaryBoolOp {
         TokenKind::Ampersand => BinaryBoolOp::And,
         TokenKind::Pipe => BinaryBoolOp::Or,
         _ => {
-            println!("{:?}", kind);
             panic!("Could not parse token kind to binary bool op");
         }
     }
@@ -158,6 +160,24 @@ fn token_from_position(s: &mut std::iter::Peekable<std::str::Chars>) -> Token {
         if buff == "define" {
             return Token {
                 kind: TokenKind::Define,
+                text: buff,
+            };
+        }
+        if buff == "list" {
+            return Token {
+                kind: TokenKind::List,
+                text: buff,
+            };
+        }
+        if buff == "cons" {
+            return Token {
+                kind: TokenKind::Cons,
+                text: buff,
+            };
+        }
+        if buff == "empty" {
+            return Token {
+                kind: TokenKind::Empty,
                 text: buff,
             };
         }
