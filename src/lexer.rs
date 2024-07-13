@@ -16,6 +16,9 @@ pub enum TokenKind {
     List,
     Cons,
     Empty,
+    Car,
+    Cdr,
+    EmptyHuh,
 
     Identifier,
 
@@ -122,6 +125,10 @@ pub fn token_kind_to_cmp_bool_op(kind: &TokenKind) -> CmpBoolOp {
     }
 }
 
+fn is_valid_string_token_char(c: &char) -> bool {
+    c.is_alphanumeric() || *c == '?' || *c == '!' || *c == '-'
+}
+
 fn token_from_position(s: &mut std::iter::Peekable<std::str::Chars>) -> Token {
     if s.peek().is_none() {
         panic!("Index out of range while parsing tokens.")
@@ -141,50 +148,51 @@ fn token_from_position(s: &mut std::iter::Peekable<std::str::Chars>) -> Token {
 
     if s.peek().unwrap().is_ascii_alphabetic() {
         let mut buff = String::new();
-        while s.peek().is_some() && s.peek().unwrap().is_ascii_alphabetic() {
+        while s.peek().is_some() && (is_valid_string_token_char(s.peek().unwrap())) {
             buff.push(s.next().unwrap());
         }
 
-        if buff == "true" || buff == "false" {
-            return Token {
+        return match buff.as_str() {
+            "true" | "false" => Token {
                 kind: TokenKind::Boolean,
                 text: buff,
-            };
-        }
-        if buff == "cond" {
-            return Token {
+            },
+            "cond" => Token {
                 kind: TokenKind::Cond,
                 text: buff,
-            };
-        }
-        if buff == "define" {
-            return Token {
+            },
+            "define" => Token {
                 kind: TokenKind::Define,
                 text: buff,
-            };
-        }
-        if buff == "list" {
-            return Token {
+            },
+            "list" => Token {
                 kind: TokenKind::List,
                 text: buff,
-            };
-        }
-        if buff == "cons" {
-            return Token {
+            },
+            "cons" => Token {
                 kind: TokenKind::Cons,
                 text: buff,
-            };
-        }
-        if buff == "empty" {
-            return Token {
+            },
+            "empty" => Token {
                 kind: TokenKind::Empty,
                 text: buff,
-            };
-        }
-
-        return Token {
-            kind: TokenKind::Identifier,
-            text: buff,
+            },
+            "car" => Token {
+                kind: TokenKind::Car,
+                text: buff,
+            },
+            "cdr" => Token {
+                kind: TokenKind::Cdr,
+                text: buff,
+            },
+            "empty?" => Token {
+                kind: TokenKind::EmptyHuh,
+                text: buff,
+            },
+            _ => Token {
+                kind: TokenKind::Identifier,
+                text: buff,
+            },
         };
     }
 

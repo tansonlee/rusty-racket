@@ -11,19 +11,19 @@ mod interpret_variable;
 mod lexer;
 mod parser;
 
-use crate::interpret::interpret_program;
+use crate::{interpret::interpret_program, lexer::string_to_tokens};
 
 fn main() {
     let program = "
-        (define (fibonacci n)
+        (define (length lst)
             (cond
-                [(= n 0) 0]
-                [(= n 1) 1]
-                [true (+ (fibonacci (- n 2)) (fibonacci (- n 1)))]))
-
-        (define (main) (fibonacci 10))
+                [(empty? lst) 0]
+                [true (+ 1 (length (cdr lst)))]))
+        
+        (define (main) (length (list 1)))
         ";
 
+    println!("{:#?}", string_to_tokens(program.to_string()));
     println!("{:?}", interpret_program(program.to_string()));
 }
 
