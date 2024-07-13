@@ -1,5 +1,7 @@
-use crate::interpret::{FunctionMap, Value, VariableMap, N, V};
+use crate::interpret::{FunctionMap, Value, VariableMap, N};
 use crate::interpret_function_call::{interpret_function_call, FunctionCall};
+use crate::interpret_list::{interpret_car_expr, Car};
+use crate::interpret_variable::{interpret_variable_expr, Variable};
 
 #[derive(PartialEq, Debug, Clone)]
 pub enum BinaryNumOp {
@@ -13,9 +15,10 @@ pub enum BinaryNumOp {
 #[derive(Debug, Clone, PartialEq)]
 pub enum Num {
     Literal(N),
-    Variable(V),
+    Variable(Variable),
     Binary(Box<BinaryNumExpr>),
     FunctionCall(FunctionCall),
+    Car(Car),
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -31,13 +34,20 @@ pub fn interpret_num_expr(expr: &Num, variable_map: &mut VariableMap, function_m
         Num::Binary(x) => interpret_binary_num_expr(x, variable_map, function_map),
         Num::Variable(x) => interpret_variable_num_expr(x, variable_map),
         Num::FunctionCall(x) => {
-            if let Value::Num(x) = interpret_function_call(x, variable_map, function_map) {
-                x
+            if let Value::Num(y) = interpret_function_call(x, variable_map, function_map) {
+                y
             } else {
                 panic!(
                     "Expected call to function {} to return number but returned boolean instead",
                     x.name
                 );
+            }
+        }
+        Num::Car(x) => {
+            if let Value::Num(y) = interpret_car_expr(x, variable_map, function_map) {
+                y
+            } else {
+                panic!()
             }
         }
     }
@@ -61,13 +71,11 @@ fn interpret_binary_num_expr(expr: &BinaryNumExpr, variable_map: &mut VariableMa
     }
 }
 
-fn interpret_variable_num_expr(expr: &V, variable_map: &VariableMap) -> N {
-    match variable_map.get(expr) {
-        Some(x) => match x[..] {
-            [.., Value::Num(y)] => y,
-            [.., Value::Bool(_)] => panic!("Variable expected to be a number. Got a boolean."),
-            _ => panic!("Couldn't find value for variable"),
-        },
-        None => panic!("Undefined variable"),
+fn interpret_variable_num_expr(expr: &Variable, variable_map: &VariableMap) -> N {
+    let res = interpret_variable_expr(expr, variable_map);
+
+    match res {
+        Value::Num(x) => x,
+        x => panic!("Variable {} does not refer to a num value", x),
     }
 }

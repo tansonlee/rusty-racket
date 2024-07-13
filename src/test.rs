@@ -202,6 +202,47 @@ fn interpret_list() {
 }
 
 #[test]
+fn interpret_car_cdr() {
+    assert_eq!(
+        interpret_program_snippet("(car (list 1 2 3 4 5))".to_string()),
+        interpret_program_snippet("1".to_string())
+    );
+    assert_eq!(
+        interpret_program_snippet("(cdr (list 1 2 3 4 5))".to_string()),
+        interpret_program_snippet("(list 2 3 4 5)".to_string())
+    );
+    assert_eq!(
+        interpret_program_snippet("(cdr (list 1))".to_string()),
+        interpret_program_snippet("empty".to_string())
+    );
+
+    assert_eq!(
+        interpret_program_snippet("(car (cons 1 (cons 2 (cons 3 (cons 4 (cons 5 empty))))))".to_string()),
+        interpret_program_snippet("1".to_string())
+    );
+    assert_eq!(
+        interpret_program_snippet("(cdr (cons 1 (cons 2 (cons 3 (cons 4 (cons 5 empty))))))".to_string()),
+        interpret_program_snippet("(list 2 3 4 5)".to_string())
+    );
+}
+
+#[test]
+fn interpret_empty_huh() {
+    assert_eq!(interpret_program_snippet("(empty? empty)".to_string()), Value::Bool(true));
+    assert_eq!(interpret_program_snippet("(empty? (list 1))".to_string()), Value::Bool(false));
+
+    assert_eq!(
+        interpret_program_snippet("(empty? (cdr (list 1)))".to_string()),
+        Value::Bool(true)
+    );
+
+    assert_eq!(
+        interpret_program_snippet("(empty? (cdr (list 1 2)))".to_string()),
+        Value::Bool(false)
+    );
+}
+
+#[test]
 fn test_median() {
     let program = "
     (define (median a b c)
@@ -256,4 +297,78 @@ fn test_fibonacci() {
     assert_eq!(interpret_program(fibonacci_program_factory(2)), Value::Num(1));
     assert_eq!(interpret_program(fibonacci_program_factory(5)), Value::Num(5));
     assert_eq!(interpret_program(fibonacci_program_factory(10)), Value::Num(55));
+}
+
+#[test]
+fn test_list_length() {
+    fn list_length_program_factory(s: &str) -> String {
+        format!(
+            "
+        (define (length lst)
+            (cond
+                [(empty? lst) 0]
+                [true (+ 1 (length (cdr lst)))]))
+        
+        (define (main) (length {}))
+        ",
+            s
+        )
+    }
+
+    assert_eq!(interpret_program(list_length_program_factory("empty")), Value::Num(0));
+    assert_eq!(interpret_program(list_length_program_factory("(list 1)")), Value::Num(1));
+    assert_eq!(
+        interpret_program(list_length_program_factory("(list 1 2 3 4 5)")),
+        Value::Num(5)
+    )
+}
+
+#[test]
+fn test_list_sum() {
+    fn list_length_program_factory(s: &str) -> String {
+        format!(
+            "
+        (define (list-sum lst)
+            (cond
+                [(empty? lst) 0]
+                [true (+ (car lst) (list-sum (cdr lst)))]))
+        
+        (define (main) (list-sum {}))
+        ",
+            s
+        )
+    }
+
+    assert_eq!(interpret_program(list_length_program_factory("empty")), Value::Num(0));
+    assert_eq!(interpret_program(list_length_program_factory("(list 1)")), Value::Num(1));
+    assert_eq!(
+        interpret_program(list_length_program_factory("(list 1 2 3 4 5)")),
+        Value::Num(15)
+    )
+}
+
+#[test]
+fn test_list_sum_acc() {
+    fn list_length_program_factory(s: &str) -> String {
+        format!(
+            "
+        (define (list-sum-helper lst acc)
+            (cond
+                [(empty? lst) acc]
+                [true (list-sum-helper (cdr lst) (+ acc (car lst)))]))
+        
+        (define (list-sum lst) (list-sum-helper lst 0))
+        
+        (define (main) (list-sum {}))
+        ",
+            s
+        )
+    }
+
+    assert_eq!(interpret_program(list_length_program_factory("empty")), Value::Num(0));
+    assert_eq!(interpret_program(list_length_program_factory("(list 1)")), Value::Num(1));
+    assert_eq!(
+        interpret_program(list_length_program_factory("(list 1 2 3 4 5)")),
+        Value::Num(15)
+    )
 }
