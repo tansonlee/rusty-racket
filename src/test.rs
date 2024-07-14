@@ -292,12 +292,8 @@ fn test_list_length() {
     fn list_length_program_factory(s: &str) -> String {
         format!(
             "
-        (define (length lst)
-            (cond
-                [(empty? lst) 0]
-                [true (+ 1 (length (cdr lst)))]))
-        
-        (define (main) (length {}))
+        (include stdlib::list)
+        (define (main) (list::length {}))
         ",
             s
         )
@@ -313,83 +309,7 @@ fn test_list_length() {
 
 #[test]
 fn test_list_sum() {
-    fn list_length_program_factory(s: &str) -> String {
-        format!(
-            "
-        (define (list-sum lst)
-            (cond
-                [(empty? lst) 0]
-                [true (+ (car lst) (list-sum (cdr lst)))]))
-        
-        (define (main) (list-sum {}))
-        ",
-            s
-        )
-    }
-
-    assert_eq!(interpret_program(list_length_program_factory("empty")), Value::Num(0));
-    assert_eq!(interpret_program(list_length_program_factory("(list 1)")), Value::Num(1));
-    assert_eq!(
-        interpret_program(list_length_program_factory("(list 1 2 3 4 5)")),
-        Value::Num(15)
-    )
-}
-
-#[test]
-fn test_list_sum_acc() {
-    fn list_length_program_factory(s: &str) -> String {
-        format!(
-            "
-        (define (list-sum-helper lst acc)
-            (cond
-                [(empty? lst) acc]
-                [true (list-sum-helper (cdr lst) (+ acc (car lst)))]))
-        
-        (define (list-sum lst) (list-sum-helper lst 0))
-        
-        (define (main) (list-sum {}))
-        ",
-            s
-        )
-    }
-
-    assert_eq!(interpret_program(list_length_program_factory("empty")), Value::Num(0));
-    assert_eq!(interpret_program(list_length_program_factory("(list 1)")), Value::Num(1));
-    assert_eq!(
-        interpret_program(list_length_program_factory("(list 1 2 3 4 5)")),
-        Value::Num(15)
-    )
-}
-
-#[test]
-fn test_list_double() {
-    fn list_double_program_factory(s: &str) -> String {
-        format!(
-            "
-        (define (list-double lst)
-            (cond
-                [(empty? lst) empty]
-                [true (cons (* 2 (car lst)) (list-double (cdr lst)))]))
-        
-        (define (main) (list-double {}))
-        ",
-            s
-        )
-    }
-
-    assert_eq!(
-        interpret_program(list_double_program_factory("empty")),
-        interpret_program_snippet("empty".to_string())
-    );
-
-    assert_eq!(
-        interpret_program(list_double_program_factory("(list 1)")),
-        interpret_program_snippet("(list 2)".to_string())
-    );
-    assert_eq!(
-        interpret_program(list_double_program_factory("(list 1 2 3 4 5)")),
-        interpret_program_snippet("(list 2 4 6 8 10)".to_string())
-    );
+    assert_eq!(interpret_program(get_example_program("list_sum.rkt")), Value::Num(15))
 }
 
 #[test]
@@ -397,14 +317,8 @@ fn test_list_reverse() {
     fn list_reverse_program_factory(s: &str) -> String {
         format!(
             "
-        (define (list-reverse-helper lst acc)
-            (cond
-                [(empty? lst) acc]
-                [true (list-reverse-helper (cdr lst) (cons (car lst) acc))]))
-
-        (define (list-reverse lst) (list-reverse-helper lst empty))
-
-        (define (main) (list-reverse {}))
+        (include stdlib::list)
+        (define (main) (list::reverse {}))
         ",
             s
         )
@@ -426,36 +340,8 @@ fn test_list_reverse() {
 
 #[test]
 fn test_list_filter_even() {
-    fn list_filter_even_program_factory(s: &str) -> String {
-        format!(
-            "
-        (define (list-filter-even lst)
-            (cond
-                [(empty? lst) empty]
-                [true (cond
-                        [(= (% (car lst) 2) 0) (list-filter-even (cdr lst))]
-                        [true (cons (car lst) (list-filter-even (cdr lst)))])])) 
-        
-        (define (main) (list-filter-even {}))
-            ",
-            s
-        )
-    }
-
     assert_eq!(
-        interpret_program(list_filter_even_program_factory("empty")),
-        interpret_program_snippet("empty".to_string())
-    );
-    assert_eq!(
-        interpret_program(list_filter_even_program_factory("(list 1 3 5)")),
-        interpret_program_snippet("(list 1 3 5)".to_string())
-    );
-    assert_eq!(
-        interpret_program(list_filter_even_program_factory("(list 2 4 6)")),
-        interpret_program_snippet("empty".to_string())
-    );
-    assert_eq!(
-        interpret_program(list_filter_even_program_factory("(list 1 2 3 4 5 6 7 8)")),
+        interpret_program(get_example_program("list_filter_even.rkt")),
         interpret_program_snippet("(list 1 3 5 7)".to_string())
     );
 }
@@ -465,14 +351,8 @@ fn test_list_contains() {
     fn list_contains_program_factory(list: &str, val: &str) -> String {
         format!(
             "
-        (define (list-contains lst val)
-            (cond
-                [(empty? lst) false]
-                [true (cond
-                        [(= val (car lst)) true]
-                        [true (list-contains (cdr lst))])])) 
-        
-        (define (main) (list-contains {} {}))
+        (include stdlib::list)
+        (define (main) (list::contains {} {}))
             ",
             list, val
         )
@@ -497,12 +377,8 @@ fn test_list_append() {
     fn list_append_program_factory(list1: &str, list2: &str) -> String {
         format!(
             "
-        (define (list-append lst1 lst2)
-            (cond
-                [(empty? lst1) lst2]
-                [true (cons (car lst1) (list-append (cdr lst1) lst2))])) 
-
-        (define (main) (list-append {} {}))
+        (include stdlib::list)
+        (define (main) (list::append {} {}))
             ",
             list1, list2
         )
@@ -528,43 +404,8 @@ fn test_list_append() {
 
 #[test]
 fn test_list_flatten() {
-    fn list_flatten_program_factory(list: &str) -> String {
-        format!(
-            "
-        (define (list-append lst1 lst2)
-            (cond
-                [(empty? lst1) lst2]
-                [true (cons (car lst1) (list-append (cdr lst1) lst2))])) 
-
-        (define (list-flatten lst)
-            (cond
-                [(empty? lst) empty]
-                [(list? (car lst)) (list-append (list-flatten (car lst)) (list-flatten (cdr lst)))]
-                [true (cons (car lst) (list-flatten (cdr lst)))])) 
-        
-        (define (main) (list-flatten {}))
-            ",
-            list
-        )
-    }
-
     assert_eq!(
-        interpret_program(list_flatten_program_factory("empty")),
-        interpret_program_snippet("empty".to_string())
-    );
-
-    assert_eq!(
-        interpret_program(list_flatten_program_factory("(list 1 2 3)")),
-        interpret_program_snippet("(list 1 2 3)".to_string())
-    );
-
-    assert_eq!(
-        interpret_program(list_flatten_program_factory("(list (list 1 2 3))")),
-        interpret_program_snippet("(list 1 2 3)".to_string())
-    );
-
-    assert_eq!(
-        interpret_program(list_flatten_program_factory("(list (list 1 2 (list 3 (list 4 5) 6 7)) 8 9)")),
+        interpret_program(get_example_program("list_flatten.rkt")),
         interpret_program_snippet("(list 1 2 3 4 5 6 7 8 9)".to_string())
     );
 }

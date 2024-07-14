@@ -10,12 +10,14 @@ cargo run <filename>
 
 ### Todo
 
--   [ ] improve user input / output
 -   [ ] more list test programs
     -   [ ] sort merge sort
     -   [ ] merge
     -   [ ] min / max
     -   [ ] zip
--   [ ] make list standard library
-    -   [ ] includes
 -   [ ] refactor to make names more consistent
+
+### Future ideas
+
+-   [ ] support functions as first class citizens
+-   [ ] support command line arguments into the racket programs

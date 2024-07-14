@@ -1,7 +1,9 @@
 use std::collections::HashMap;
 use std::fmt;
+use std::fs;
 
 use itertools::peek_nth;
+use regex::Regex;
 
 use crate::interpret_bool::*;
 use crate::interpret_cond::*;
@@ -38,7 +40,7 @@ impl fmt::Display for ValueList {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             ValueList::Empty => write!(f, "empty"),
-            ValueList::Node(node) => write!(f, "({:#?} -> {:#?})", node.data, node.next),
+            ValueList::Node(node) => write!(f, "({} -> {})", node.data, node.next),
         }
     }
 }
@@ -105,8 +107,21 @@ pub fn parse_functions(program: String) -> FunctionMap {
 }
 
 pub fn interpret_program(program: String) -> Value {
+    // Preprocessor for includes. (can make this smarter in the future)
+    let re = Regex::new(r"\(include ([^\)]+)\)").unwrap();
+    let processed = re
+        .replace_all(&program, |captures: &regex::Captures| {
+            let module_name = &captures[1];
+            if module_name == "stdlib::list" {
+                get_module_content(module_name)
+            } else {
+                panic!("Unknown module name {}", module_name);
+            }
+        })
+        .to_string();
+
     // First interpret all of the functions to fill the function map.
-    let function_map = parse_functions(program);
+    let function_map = parse_functions(processed);
 
     // Begin interpreting from the main function.
     interpret(&parse("(main)".to_string()), &mut HashMap::new(), &function_map)
@@ -129,4 +144,19 @@ pub fn interpret(expr: &Expr, variable_map: &mut VariableMap, function_map: &Fun
         // Function definitions should be interpreted in the previous pass.
         Expr::FunctionExpr(_) => panic!("Encountered function expr"),
     }
+}
+
+// module_name is something like 'stdlib::list'
+fn get_module_content(module_name: &str) -> String {
+    let module_prefix = "stdlib::";
+    if !module_name.starts_with(module_prefix) {
+        panic!("Invalid module name {}", module_name);
+    }
+
+    let module_file = format!("{}.rkt", &module_name[module_prefix.len()..]);
+
+    let program = fs::read_to_string(format!("examples/stdlib/{}", module_file))
+        .expect(&format!("Failed to read module file {}", module_name));
+
+    program
 }

@@ -118,8 +118,12 @@ pub fn token_kind_to_cmp_bool_op(kind: &TokenKind) -> CmpBoolOp {
     }
 }
 
+fn is_valid_starting_string_token_char(c: &char) -> bool {
+    c.is_ascii_alphabetic() || *c == '_'
+}
+
 fn is_valid_string_token_char(c: &char) -> bool {
-    c.is_alphanumeric() || *c == '?' || *c == '!' || *c == '-'
+    is_valid_starting_string_token_char(c) || c.is_ascii_alphanumeric() || *c == '?' || *c == '!' || *c == '-' || *c == ':'
 }
 
 fn token_from_position(s: &mut std::iter::Peekable<std::str::Chars>) -> Token {
@@ -139,7 +143,7 @@ fn token_from_position(s: &mut std::iter::Peekable<std::str::Chars>) -> Token {
         };
     }
 
-    if s.peek().unwrap().is_ascii_alphabetic() {
+    if is_valid_starting_string_token_char(s.peek().unwrap()) {
         let mut buff = String::new();
         while s.peek().is_some() && (is_valid_string_token_char(s.peek().unwrap())) {
             buff.push(s.next().unwrap());

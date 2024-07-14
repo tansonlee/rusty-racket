@@ -28,7 +28,11 @@ pub fn interpret_function_call(
         variable_map.entry(name.to_string()).or_insert(Vec::new()).push(arg.clone());
     }
 
-    let function_body = &function_map.get(&function_call.name).clone().unwrap().body;
+    let function_body = &function_map
+        .get(&function_call.name)
+        .clone()
+        .expect(&format!("Undefined function '{}'", &function_call.name))
+        .body;
 
     let result = interpret(&function_body, variable_map, function_map);
 
