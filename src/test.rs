@@ -528,3 +528,80 @@ fn test_list_contains() {
         Value::Bool(true)
     );
 }
+
+#[test]
+fn test_list_append() {
+    fn list_append_program_factory(list1: &str, list2: &str) -> String {
+        format!(
+            "
+        (define (list-append lst1 lst2)
+            (cond
+                [(empty? lst1) lst2]
+                [true (cons (car lst1) (list-append (cdr lst1) lst2))])) 
+
+        (define (main) (list-append {} {}))
+            ",
+            list1, list2
+        )
+    }
+
+    assert_eq!(
+        interpret_program(list_append_program_factory("empty", "empty")),
+        interpret_program_snippet("empty".to_string())
+    );
+    assert_eq!(
+        interpret_program(list_append_program_factory("empty", "(list 1 2 3)")),
+        interpret_program_snippet("(list 1 2 3)".to_string())
+    );
+    assert_eq!(
+        interpret_program(list_append_program_factory("(list 1 2 3)", "empty")),
+        interpret_program_snippet("(list 1 2 3)".to_string())
+    );
+    assert_eq!(
+        interpret_program(list_append_program_factory("(list 1 2 3)", "(list 4 5 6)")),
+        interpret_program_snippet("(list 1 2 3 4 5 6)".to_string())
+    );
+}
+
+#[test]
+fn test_list_flatten() {
+    fn list_flatten_program_factory(list: &str) -> String {
+        format!(
+            "
+        (define (list-append lst1 lst2)
+            (cond
+                [(empty? lst1) lst2]
+                [true (cons (car lst1) (list-append (cdr lst1) lst2))])) 
+
+        (define (list-flatten lst)
+            (cond
+                [(empty? lst) empty]
+                [(list? (car lst)) (list-append (list-flatten (car lst)) (list-flatten (cdr lst)))]
+                [true (cons (car lst) (list-flatten (cdr lst)))])) 
+        
+        (define (main) (list-flatten {}))
+            ",
+            list
+        )
+    }
+
+    assert_eq!(
+        interpret_program(list_flatten_program_factory("empty")),
+        interpret_program_snippet("empty".to_string())
+    );
+
+    assert_eq!(
+        interpret_program(list_flatten_program_factory("(list 1 2 3)")),
+        interpret_program_snippet("(list 1 2 3)".to_string())
+    );
+
+    assert_eq!(
+        interpret_program(list_flatten_program_factory("(list (list 1 2 3))")),
+        interpret_program_snippet("(list 1 2 3)".to_string())
+    );
+
+    assert_eq!(
+        interpret_program(list_flatten_program_factory("(list (list 1 2 (list 3 (list 4 5) 6 7)) 8 9)")),
+        interpret_program_snippet("(list 1 2 3 4 5 6 7 8 9)".to_string())
+    );
+}

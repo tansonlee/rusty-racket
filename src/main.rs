@@ -17,12 +17,18 @@ use crate::{interpret::interpret_program, lexer::string_to_tokens};
 
 fn main() {
     let program = "
-        (define (list-double lst)
-            (cond
-                [(empty? lst) empty]
-                [true (cons (* 2 (car lst)) (list-double (cdr lst)))]))
-        
-        (define (main) (list-double (list 1)))
+    (define (list-append lst1 lst2)
+    (cond
+        [(empty? lst1) lst2]
+        [true (cons (car lst1) (list-append (cdr lst1) lst2))])) 
+
+(define (list-flatten lst)
+    (cond
+        [(empty? lst) empty]
+        [(list? lst) (list-append (list-flatten (car lst)) (list-flatten (cdr lst)))]
+        [true (cons (car lst) (list-flatten (cdr lst)))])) 
+
+(define (main) (list-flatten empty))
         ";
 
     println!("{:#?}", string_to_tokens(program.to_string()));
