@@ -69,7 +69,6 @@ pub fn parse_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Expr {
             TokenKind::Define => Expr::FunctionExpr(parse_function_expr(tokens)),
             TokenKind::Cond => Expr::CondExpr(parse_cond_expr(tokens)),
             TokenKind::Car => Expr::CarExpr(parse_car_expr(tokens)),
-            TokenKind::EmptyHuh => Expr::BoolExpr(Bool::EmptyHuh(parse_empty_huh_expr(tokens))),
             TokenKind::Identifier => Expr::FunctionCallExpr(parse_function_call(tokens)),
             TokenKind::List | TokenKind::Cons | TokenKind::Cdr => Expr::ListExpr(parse_list_expr(tokens)),
             TokenKind::Plus | TokenKind::Minus | TokenKind::Slash | TokenKind::Star | TokenKind::Percent => {
@@ -80,7 +79,9 @@ pub fn parse_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Expr {
             | TokenKind::Bang
             | TokenKind::LessThan
             | TokenKind::Equal
-            | TokenKind::GreaterThan => Expr::BoolExpr(parse_bool_expr(tokens)),
+            | TokenKind::GreaterThan
+            | TokenKind::EmptyHuh
+            | TokenKind::ListHuh => Expr::BoolExpr(parse_bool_expr(tokens)),
             _ => panic!(
                 "Invalid expression starting with an open parenthesis '(': {}",
                 tokens.peek_nth(1).unwrap()
@@ -137,6 +138,7 @@ fn parse_bool_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Bool {
             TokenKind::LessThan | TokenKind::Equal | TokenKind::GreaterThan => parse_cmp_bool_expr(tokens),
             TokenKind::Identifier => Bool::FunctionCall(parse_function_call(tokens)),
             TokenKind::EmptyHuh => Bool::EmptyHuh(parse_empty_huh_expr(tokens)),
+            TokenKind::ListHuh => Bool::ListHuh(parse_list_huh_expr(tokens)),
             TokenKind::Car => Bool::Car(parse_car_expr(tokens)),
             _ => panic!(
                 "Invalid expression starting with an open parenthesis '(': {}",
@@ -325,14 +327,6 @@ fn parse_cons_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> ListLiteral {
             data: Box::new(first),
             next: Box::new(rest),
         })
-
-        // match rest {
-        //     List::ListLiteral(y) => ListLiteral::Node(Node {
-        //         data: Box::new(first),
-        //         next: Box::new(y),
-        //     }),
-        //     y => ListLiteral::List(),
-        // }
     }
 }
 
@@ -382,4 +376,16 @@ fn parse_empty_huh_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> EmptyHuhExpr {
         },
         x => panic!("Malformed empty? expr: argument is not a list: {:#?}", x),
     }
+}
+
+// (list? expr)
+fn parse_list_huh_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> ListHuhExpr {
+    consume_open_paren(tokens);
+    assert_eq!(tokens.next().unwrap().kind, TokenKind::ListHuh);
+
+    let expr = parse_expr(tokens);
+
+    consume_close_paren(tokens);
+
+    ListHuhExpr { expr: Box::new(expr) }
 }

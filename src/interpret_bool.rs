@@ -1,4 +1,4 @@
-use crate::interpret::{FunctionMap, Value, ValueList, VariableMap, B};
+use crate::interpret::{interpret, Expr, FunctionMap, Value, ValueList, VariableMap, B};
 use crate::interpret_function_call::{interpret_function_call, FunctionCall};
 use crate::interpret_list::{interpret_car_expr, interpret_list_expr, Car, List};
 use crate::interpret_num::*;
@@ -13,6 +13,7 @@ pub enum Bool {
     Cmp(Box<CmpBoolExpr>),
     FunctionCall(FunctionCall),
     EmptyHuh(EmptyHuhExpr),
+    ListHuh(ListHuhExpr),
     Car(Car),
 }
 
@@ -59,6 +60,11 @@ pub struct EmptyHuhExpr {
     pub list: Box<List>,
 }
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct ListHuhExpr {
+    pub expr: Box<Expr>,
+}
+
 pub fn interpret_bool_expr(expr: &Bool, variable_map: &mut VariableMap, function_map: &FunctionMap) -> B {
     match expr {
         Bool::Literal(x) => *x,
@@ -67,6 +73,7 @@ pub fn interpret_bool_expr(expr: &Bool, variable_map: &mut VariableMap, function
         Bool::Unary(x) => interpret_unary_bool_expr(&x, variable_map, function_map),
         Bool::Cmp(x) => interpret_cmp_bool_expr(&x, variable_map, function_map),
         Bool::EmptyHuh(x) => interpret_empty_huh_expr(x, variable_map, function_map),
+        Bool::ListHuh(x) => interpret_list_huh_expr(x, variable_map, function_map),
         Bool::FunctionCall(x) => {
             if let Value::Bool(x) = interpret_function_call(&x, variable_map, function_map) {
                 x
@@ -142,5 +149,14 @@ pub fn interpret_empty_huh_expr(list: &EmptyHuhExpr, variable_map: &mut Variable
     match res {
         ValueList::Empty => true,
         ValueList::Node(_) => false,
+    }
+}
+
+pub fn interpret_list_huh_expr(expr: &ListHuhExpr, variable_map: &mut VariableMap, function_map: &FunctionMap) -> B {
+    let res = interpret(&expr.expr, variable_map, function_map);
+
+    match res {
+        Value::List(_) => true,
+        _ => false,
     }
 }

@@ -19,6 +19,7 @@ pub enum TokenKind {
     Car,
     Cdr,
     EmptyHuh,
+    ListHuh,
 
     Identifier,
 
@@ -187,6 +188,10 @@ fn token_from_position(s: &mut std::iter::Peekable<std::str::Chars>) -> Token {
             },
             "empty?" => Token {
                 kind: TokenKind::EmptyHuh,
+                text: buff,
+            },
+            "list?" => Token {
+                kind: TokenKind::ListHuh,
                 text: buff,
             },
             _ => Token {

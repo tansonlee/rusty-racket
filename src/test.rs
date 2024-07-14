@@ -247,6 +247,27 @@ fn interpret_empty_huh() {
 }
 
 #[test]
+fn interpret_list_huh() {
+    assert_eq!(interpret_program_snippet("(list? empty)".to_string()), Value::Bool(true));
+    assert_eq!(interpret_program_snippet("(list? (list 1))".to_string()), Value::Bool(true));
+
+    assert_eq!(
+        interpret_program_snippet("(list? (cdr (list 1)))".to_string()),
+        Value::Bool(true)
+    );
+
+    assert_eq!(
+        interpret_program_snippet("(list? (cdr (list 1 2)))".to_string()),
+        Value::Bool(true)
+    );
+
+    assert_eq!(interpret_program_snippet("(list? 5)".to_string()), Value::Bool(false));
+
+    assert_eq!(interpret_program_snippet("(list? true)".to_string()), Value::Bool(false));
+    assert_eq!(interpret_program_snippet("(list? true)".to_string()), Value::Bool(false));
+}
+
+#[test]
 fn test_median() {
     let program = "
     (define (median a b c)
@@ -405,5 +426,105 @@ fn test_list_double() {
     assert_eq!(
         interpret_program(list_double_program_factory("(list 1 2 3 4 5)")),
         interpret_program_snippet("(list 2 4 6 8 10)".to_string())
+    );
+}
+
+#[test]
+fn test_list_reverse() {
+    fn list_reverse_program_factory(s: &str) -> String {
+        format!(
+            "
+        (define (list-reverse-helper lst acc)
+            (cond
+                [(empty? lst) acc]
+                [true (list-reverse-helper (cdr lst) (cons (car lst) acc))]))
+
+        (define (list-reverse lst) (list-reverse-helper lst empty))
+
+        (define (main) (list-reverse {}))
+        ",
+            s
+        )
+    }
+
+    assert_eq!(
+        interpret_program(list_reverse_program_factory("empty")),
+        interpret_program_snippet("empty".to_string())
+    );
+    assert_eq!(
+        interpret_program(list_reverse_program_factory("(list 1)")),
+        interpret_program_snippet("(list 1)".to_string())
+    );
+    assert_eq!(
+        interpret_program(list_reverse_program_factory("(list 1 2 3 4 5 6)")),
+        interpret_program_snippet("(list 6 5 4 3 2 1)".to_string())
+    );
+}
+
+#[test]
+fn test_list_filter_even() {
+    fn list_filter_even_program_factory(s: &str) -> String {
+        format!(
+            "
+        (define (list-filter-even lst)
+            (cond
+                [(empty? lst) empty]
+                [true (cond
+                        [(= (% (car lst) 2) 0) (list-filter-even (cdr lst))]
+                        [true (cons (car lst) (list-filter-even (cdr lst)))])])) 
+        
+        (define (main) (list-filter-even {}))
+            ",
+            s
+        )
+    }
+
+    assert_eq!(
+        interpret_program(list_filter_even_program_factory("empty")),
+        interpret_program_snippet("empty".to_string())
+    );
+    assert_eq!(
+        interpret_program(list_filter_even_program_factory("(list 1 3 5)")),
+        interpret_program_snippet("(list 1 3 5)".to_string())
+    );
+    assert_eq!(
+        interpret_program(list_filter_even_program_factory("(list 2 4 6)")),
+        interpret_program_snippet("empty".to_string())
+    );
+    assert_eq!(
+        interpret_program(list_filter_even_program_factory("(list 1 2 3 4 5 6 7 8)")),
+        interpret_program_snippet("(list 1 3 5 7)".to_string())
+    );
+}
+
+#[test]
+fn test_list_contains() {
+    fn list_contains_program_factory(list: &str, val: &str) -> String {
+        format!(
+            "
+        (define (list-contains lst val)
+            (cond
+                [(empty? lst) false]
+                [true (cond
+                        [(= val (car lst)) true]
+                        [true (list-contains (cdr lst))])])) 
+        
+        (define (main) (list-contains {} {}))
+            ",
+            list, val
+        )
+    }
+
+    assert_eq!(
+        interpret_program(list_contains_program_factory("empty", "5")),
+        Value::Bool(false)
+    );
+    assert_eq!(
+        interpret_program(list_contains_program_factory("(list 1 3 5)", "10")),
+        Value::Bool(false)
+    );
+    assert_eq!(
+        interpret_program(list_contains_program_factory("(list 1 3 5)", "1")),
+        Value::Bool(true)
     );
 }
