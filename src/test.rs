@@ -385,7 +385,7 @@ fn test_list_double() {
         (define (list-double lst)
             (cond
                 [(empty? lst) empty]
-                [true (cons (* 2 (car lst)) (cdr lst))]))
+                [true (cons (* 2 (car lst)) (list-double (cdr lst)))]))
         
         (define (main) (list-double {}))
         ",
@@ -396,5 +396,14 @@ fn test_list_double() {
     assert_eq!(
         interpret_program(list_double_program_factory("empty")),
         interpret_program_snippet("empty".to_string())
+    );
+
+    assert_eq!(
+        interpret_program(list_double_program_factory("(list 1)")),
+        interpret_program_snippet("(list 2)".to_string())
+    );
+    assert_eq!(
+        interpret_program(list_double_program_factory("(list 1 2 3 4 5)")),
+        interpret_program_snippet("(list 2 4 6 8 10)".to_string())
     );
 }

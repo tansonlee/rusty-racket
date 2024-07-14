@@ -38,7 +38,7 @@ pub fn interpret_num_expr(expr: &Num, variable_map: &mut VariableMap, function_m
                 y
             } else {
                 panic!(
-                    "Expected call to function {} to return number but returned boolean instead",
+                    "Expected call to function {} to return number but returned something else instead",
                     x.name
                 );
             }

@@ -72,7 +72,7 @@ pub fn interpret_bool_expr(expr: &Bool, variable_map: &mut VariableMap, function
                 x
             } else {
                 panic!(
-                    "Expected call to function {} to return boolean but returned number instead",
+                    "Expected call to function {} to return boolean but returned something else instead",
                     x.name
                 );
             }

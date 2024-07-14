@@ -90,7 +90,7 @@ pub struct Environment {
 pub type VariableMap = HashMap<String, Vec<Value>>;
 pub type FunctionMap = HashMap<String, FunctionInfo>;
 
-fn parse_functions(program: String) -> FunctionMap {
+pub fn parse_functions(program: String) -> FunctionMap {
     let tokens = string_to_tokens(program);
     let mut token_iterator = peek_nth(TokenIter::new(&tokens));
 

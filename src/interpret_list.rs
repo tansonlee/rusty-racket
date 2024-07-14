@@ -1,12 +1,13 @@
 use crate::{
     interpret::{interpret, Expr, FunctionMap, Value, ValueList, ValueNode, VariableMap, L},
+    interpret_function_call::{interpret_function_call, FunctionCall},
     interpret_variable::{interpret_variable_expr, Variable},
 };
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Node {
     pub data: Box<Expr>,
-    pub next: Box<ListLiteral>,
+    pub next: Box<List>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -15,6 +16,7 @@ pub enum List {
     Cdr(Cdr),
     Variable(Variable),
     Car(Car),
+    FunctionCall(FunctionCall),
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -38,6 +40,16 @@ pub fn interpret_list_expr(list: &List, variable_map: &mut VariableMap, function
         List::ListLiteral(x) => interpret_list_literal_expr(x, variable_map, function_map),
         List::Cdr(x) => interpret_cdr_expr(&x, variable_map, function_map),
         List::Variable(x) => interpret_variable_list_expr(x, variable_map),
+        List::FunctionCall(x) => {
+            if let Value::List(y) = interpret_function_call(x, variable_map, function_map) {
+                y
+            } else {
+                panic!(
+                    "Expected call to function {} to return list but returned something else instead",
+                    x.name
+                );
+            }
+        }
         List::Car(x) => {
             if let Value::List(y) = interpret_car_expr(x, variable_map, function_map) {
                 y
@@ -53,7 +65,7 @@ pub fn interpret_list_literal_expr(list: &ListLiteral, variable_map: &mut Variab
         ListLiteral::Empty => ValueList::Empty,
         ListLiteral::Node(y) => {
             let interpreted_data = interpret(&y.data, variable_map, function_map);
-            let interpreted_next = interpret_list_literal_expr(&y.next, variable_map, function_map);
+            let interpreted_next = interpret_list_expr(&y.next, variable_map, function_map);
 
             ValueList::Node(ValueNode {
                 data: Box::new(interpreted_data),
