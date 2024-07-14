@@ -69,10 +69,8 @@ pub enum Expr {
     VariableExpr(Variable),
     FunctionCallExpr(FunctionCall),
     ListExpr(List),
-    ConsExpr(List),
     EmptyExpr(List),
     CarExpr(Car),
-    CdrExpr(List),
 }
 
 #[derive(Debug)]
@@ -114,6 +112,7 @@ pub fn interpret_program(program: String) -> Value {
     interpret(&parse("(main)".to_string()), &mut HashMap::new(), &function_map)
 }
 
+#[allow(dead_code)] // Used in tests
 pub fn interpret_program_snippet(program: String) -> Value {
     interpret(&parse(program.to_string()), &mut HashMap::new(), &HashMap::new())
 }
@@ -126,9 +125,7 @@ pub fn interpret(expr: &Expr, variable_map: &mut VariableMap, function_map: &Fun
         Expr::VariableExpr(x) => interpret_variable_expr(&x, variable_map),
         Expr::FunctionCallExpr(x) => interpret_function_call(&x, variable_map, function_map),
         Expr::CarExpr(x) => interpret_car_expr(x, variable_map, function_map),
-        Expr::ListExpr(x) | Expr::ConsExpr(x) | Expr::EmptyExpr(x) | Expr::CdrExpr(x) => {
-            Value::List(interpret_list_expr(&x, variable_map, function_map))
-        }
+        Expr::ListExpr(x) | Expr::EmptyExpr(x) => Value::List(interpret_list_expr(&x, variable_map, function_map)),
         // Function definitions should be interpreted in the previous pass.
         Expr::FunctionExpr(_) => panic!("Encountered function expr"),
     }

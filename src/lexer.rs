@@ -65,14 +65,6 @@ impl<'a> TokenIter<'a> {
     pub fn new(tokens: &'a Vec<Token>) -> Self {
         TokenIter { tokens, index: 0 }
     }
-
-    pub fn peek_n(&self, n: i32) -> Option<(&Token, &Token)> {
-        if self.index + (n as usize) < self.tokens.len() {
-            Some((&self.tokens[self.index], &self.tokens[self.index + n as usize]))
-        } else {
-            None
-        }
-    }
 }
 
 impl<'a> Iterator for TokenIter<'a> {
@@ -254,7 +246,7 @@ fn token_from_position(s: &mut std::iter::Peekable<std::str::Chars>) -> Token {
             kind: TokenKind::GreaterThan,
             text: ">".to_string(),
         },
-        _ => todo!("Unhandled case in token_from_position"),
+        x => todo!("Unhandled case in token_from_position {}", x),
     }
 }
 

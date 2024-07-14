@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, env, fs, path::PathBuf};
 
 use itertools::peek_nth;
 
@@ -8,12 +8,14 @@ use crate::{
     parser::{parse, parse_num_expr},
 };
 
-fn empty_variable_map() -> VariableMap {
-    HashMap::new()
-}
+fn get_example_program(file: &str) -> String {
+    let curr_dir = env::current_dir().expect("Failed to get current directory");
+    let mut path = PathBuf::from(&curr_dir);
+    path.push(format!("examples/{}", file));
 
-fn empty_function_map() -> FunctionMap {
-    HashMap::new()
+    let program = fs::read_to_string(&path).expect(format!("Failed to read file at {}", path.to_str().unwrap()).as_str());
+
+    program
 }
 
 #[test]
@@ -269,59 +271,20 @@ fn interpret_list_huh() {
 
 #[test]
 fn test_median() {
-    let program = "
-    (define (median a b c)
-        (cond
-            [(| (& (< a b) (< b c)) (& (< c b) (< b a))) b]
-            [(| (& (< b a) (< a c)) (& (< c a) (< a b))) a]
-            [(| (& (< a c) (< c b)) (& (< b c) (< c a))) c]))
-    (define (main) (median 3 1 2))
-    ";
+    let program = get_example_program("median.rkt");
     assert_eq!(interpret_program(program.to_string()), Value::Num(2));
 }
 
 #[test]
 fn test_factorial() {
-    fn factorial_program_factory(n: i32) -> String {
-        format!(
-            "
-        (define (factorial n)
-            (cond
-                [(= n 1) 1]
-                [true (* n (factorial (- n 1)))]))
-
-        (define (main) (factorial {}))
-        ",
-            n
-        )
-    }
-
-    assert_eq!(interpret_program(factorial_program_factory(1)), Value::Num(1));
-    assert_eq!(interpret_program(factorial_program_factory(2)), Value::Num(2));
-    assert_eq!(interpret_program(factorial_program_factory(10)), Value::Num(3628800));
+    let program = get_example_program("factorial.rkt");
+    assert_eq!(interpret_program(program), Value::Num(1 + 2 + 3628800));
 }
 
 #[test]
 fn test_fibonacci() {
-    fn fibonacci_program_factory(n: i32) -> String {
-        format!(
-            "
-        (define (fibonacci n)
-            (cond
-                [(= n 0) 0]
-                [(= n 1) 1]
-                [true (+ (fibonacci (- n 1)) (fibonacci (- n 2)))]))
-
-        (define (main) (fibonacci {}))
-        ",
-            n
-        )
-    }
-
-    assert_eq!(interpret_program(fibonacci_program_factory(1)), Value::Num(1));
-    assert_eq!(interpret_program(fibonacci_program_factory(2)), Value::Num(1));
-    assert_eq!(interpret_program(fibonacci_program_factory(5)), Value::Num(5));
-    assert_eq!(interpret_program(fibonacci_program_factory(10)), Value::Num(55));
+    let program = get_example_program("fibonacci.rkt");
+    assert_eq!(interpret_program(program), Value::Num(0 + 1 + 5 + 55));
 }
 
 #[test]

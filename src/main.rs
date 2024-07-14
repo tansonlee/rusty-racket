@@ -1,4 +1,4 @@
-#![allow(dead_code)]
+// #![allow(dead_code)]
 
 mod interpret;
 mod interpret_bool;
@@ -11,29 +11,32 @@ mod interpret_variable;
 mod lexer;
 mod parser;
 
+use std::{env, fs};
+
 use interpret::parse_functions;
 
 use crate::{interpret::interpret_program, lexer::string_to_tokens};
 
 fn main() {
-    let program = "
-    (define (list-append lst1 lst2)
-    (cond
-        [(empty? lst1) lst2]
-        [true (cons (car lst1) (list-append (cdr lst1) lst2))])) 
+    let args: Vec<String> = env::args().collect();
 
-(define (list-flatten lst)
-    (cond
-        [(empty? lst) empty]
-        [(list? lst) (list-append (list-flatten (car lst)) (list-flatten (cdr lst)))]
-        [true (cons (car lst) (list-flatten (cdr lst)))])) 
+    if args.len() < 2 {
+        eprintln!("Usage: {} <file>", args[0]);
+        std::process::exit(1);
+    }
 
-(define (main) (list-flatten empty))
-        ";
+    let file_path = &args[1];
 
-    println!("{:#?}", string_to_tokens(program.to_string()));
-    println!("{:#?}", parse_functions(program.to_string()));
-    println!("{:?}", interpret_program(program.to_string()));
+    let program = fs::read_to_string(file_path).expect(&format!("Unable to read file {}", file_path));
+
+    if args.len() == 3 && args[2] == "--debug" {
+        println!("---------- tokens ----------");
+        println!("{:#?}", string_to_tokens(program.to_string()));
+        println!("---------- abstract syntax tree ----------");
+        println!("{:#?}", parse_functions(program.to_string()));
+        println!("---------- result ----------");
+    }
+    println!("{}", interpret_program(program.to_string()));
 }
 
 #[cfg(test)]

@@ -340,7 +340,7 @@ fn parse_car_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Car {
     consume_close_paren(tokens);
 
     match list {
-        Expr::ListExpr(x) | Expr::ConsExpr(x) | Expr::EmptyExpr(x) | Expr::CdrExpr(x) => Car { list: Box::new(x) },
+        Expr::ListExpr(x) | Expr::EmptyExpr(x) => Car { list: Box::new(x) },
         Expr::VariableExpr(x) => Car {
             list: Box::new(List::Variable(x)),
         },
@@ -370,7 +370,7 @@ fn parse_empty_huh_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> EmptyHuhExpr {
     consume_close_paren(tokens);
 
     match list {
-        Expr::ListExpr(x) | Expr::ConsExpr(x) | Expr::EmptyExpr(x) | Expr::CdrExpr(x) => EmptyHuhExpr { list: Box::new(x) },
+        Expr::ListExpr(x) | Expr::EmptyExpr(x) => EmptyHuhExpr { list: Box::new(x) },
         Expr::VariableExpr(x) => EmptyHuhExpr {
             list: Box::new(List::Variable(x)),
         },
