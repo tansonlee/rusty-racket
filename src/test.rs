@@ -204,6 +204,10 @@ fn interpret_list() {
 #[test]
 fn interpret_car_cdr() {
     assert_eq!(
+        interpret_program_snippet("(car (list 1))".to_string()),
+        interpret_program_snippet("1".to_string())
+    );
+    assert_eq!(
         interpret_program_snippet("(car (list 1 2 3 4 5))".to_string()),
         interpret_program_snippet("1".to_string())
     );
@@ -371,4 +375,26 @@ fn test_list_sum_acc() {
         interpret_program(list_length_program_factory("(list 1 2 3 4 5)")),
         Value::Num(15)
     )
+}
+
+#[test]
+fn test_list_double() {
+    fn list_double_program_factory(s: &str) -> String {
+        format!(
+            "
+        (define (list-double lst)
+            (cond
+                [(empty? lst) empty]
+                [true (cons (* 2 (car lst)) (cdr lst))]))
+        
+        (define (main) (list-double {}))
+        ",
+            s
+        )
+    }
+
+    assert_eq!(
+        interpret_program(list_double_program_factory("empty")),
+        interpret_program_snippet("empty".to_string())
+    );
 }

@@ -8,6 +8,7 @@ use crate::interpret_function::Function;
 use crate::interpret_function_call::FunctionCall;
 use crate::interpret_list::Car;
 use crate::interpret_list::Cdr;
+use crate::interpret_list::ListLiteral;
 use crate::interpret_list::{List, Node};
 use crate::interpret_num::*;
 use crate::interpret_variable::*;
@@ -42,7 +43,13 @@ pub fn parse(program: String) -> Expr {
     let parsed = parse_expr(&mut token_iterator);
 
     if token_iterator.peek().is_some() {
-        panic!("Malformed program, more tokens after program completion");
+        panic!(
+            "Malformed program, more tokens after program completion {}",
+            token_iterator
+                .map(|token| format!("{}", token))
+                .collect::<Vec<_>>()
+                .join(", ")
+        );
     }
 
     parsed
@@ -56,15 +63,15 @@ pub fn parse_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Expr {
         TokenKind::Boolean => Expr::BoolExpr(Bool::Literal(tokens.next().unwrap().text.parse::<bool>().unwrap())),
         TokenKind::Empty => {
             tokens.next();
-            Expr::EmptyExpr(List::Empty)
+            Expr::EmptyExpr(List::ListLiteral(ListLiteral::Empty))
         }
         TokenKind::OpenParen => match tokens.peek_nth(1).unwrap().kind {
             TokenKind::Define => Expr::FunctionExpr(parse_function_expr(tokens)),
             TokenKind::Cond => Expr::CondExpr(parse_cond_expr(tokens)),
-            TokenKind::List => Expr::ListExpr(parse_list_expr(tokens)),
-            TokenKind::Cons => Expr::ConsExpr(parse_cons_expr(tokens)),
+            TokenKind::List => Expr::ListExpr(List::ListLiteral(parse_list_expr(tokens))),
+            TokenKind::Cons => Expr::ConsExpr(List::ListLiteral(parse_cons_expr(tokens))),
             TokenKind::Car => Expr::CarExpr(parse_car_expr(tokens)),
-            TokenKind::Cdr => Expr::CdrExpr(parse_cdr_expr(tokens)),
+            TokenKind::Cdr => Expr::CdrExpr(List::Cdr(parse_cdr_expr(tokens))),
             TokenKind::EmptyHuh => Expr::BoolExpr(Bool::EmptyHuh(parse_empty_huh_expr(tokens))),
             TokenKind::Plus | TokenKind::Minus | TokenKind::Slash | TokenKind::Star | TokenKind::Percent => {
                 Expr::NumExpr(parse_num_expr(tokens))
@@ -251,63 +258,49 @@ fn parse_function_call(tokens: &mut PeekNth<TokenIter<'_>>) -> FunctionCall {
     }
 }
 
-fn parse_list_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> List {
+fn parse_list_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> ListLiteral {
     consume_open_paren(tokens);
     assert_eq!(tokens.next().unwrap().kind, TokenKind::List);
 
-    let mut list_items = List::Empty;
-    let mut curr = &mut list_items;
+    let mut list_items = Vec::new();
 
     while tokens.peek().unwrap().kind != TokenKind::CloseParen {
-        let expr = parse_expr(tokens);
-        let new_node = Node {
-            data: Box::new(expr),
-            next: Box::new(List::Empty),
-        };
-
-        match curr {
-            List::Empty => {
-                *curr = List::Node(new_node);
-            }
-            List::Node(ref mut node) => {
-                node.next = Box::new(List::Node(new_node));
-                curr = &mut node.next;
-            }
-            List::Variable(_) => todo!(),
-            List::Cdr(_) => todo!(),
-            List::Car(_) => todo!(),
-        }
+        list_items.push(parse_expr(tokens));
     }
 
     consume_close_paren(tokens);
 
-    list_items
+    // Turn vec of list items to a `List`
+    let mut result = ListLiteral::Empty;
+
+    for item in list_items.into_iter().rev() {
+        result = ListLiteral::Node(Node {
+            data: Box::new(item),
+            next: Box::new(result),
+        });
+    }
+
+    result
 }
 
 // (cons 1 (cons 2 empty)) or (cons 1 empty)
-fn parse_cons_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> List {
-    consume_open_paren(tokens);
-    assert_eq!(tokens.next().unwrap().kind, TokenKind::Cons);
+fn parse_cons_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> ListLiteral {
+    let first_token = tokens.next().unwrap();
 
-    let first = parse_expr(tokens);
-    let rest = parse_expr(tokens);
+    if let TokenKind::Empty = first_token.kind {
+        ListLiteral::Empty
+    } else {
+        assert_eq!(tokens.next().unwrap().kind, TokenKind::Cons);
 
-    consume_close_paren(tokens);
+        let first = parse_expr(tokens);
+        let rest = parse_cons_expr(tokens);
 
-    match rest {
-        Expr::EmptyExpr(_) => List::Node(Node {
+        consume_close_paren(tokens);
+
+        ListLiteral::Node(Node {
             data: Box::new(first),
-            next: Box::new(List::Empty),
-        }),
-        Expr::ConsExpr(x) => List::Node(Node {
-            data: Box::new(first),
-            next: Box::new(x),
-        }),
-        Expr::VariableExpr(x) => List::Node(Node {
-            data: Box::new(first),
-            next: Box::new(List::Variable(x)),
-        }),
-        _ => panic!("Malformed cons expression"),
+            next: Box::new(rest),
+        })
     }
 }
 
@@ -330,7 +323,7 @@ fn parse_car_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Car {
 }
 
 // (cdr <some list>)
-fn parse_cdr_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> List {
+fn parse_cdr_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> Cdr {
     consume_open_paren(tokens);
     assert_eq!(tokens.next().unwrap().kind, TokenKind::Cdr);
 
@@ -339,10 +332,10 @@ fn parse_cdr_expr(tokens: &mut PeekNth<TokenIter<'_>>) -> List {
     consume_close_paren(tokens);
 
     match list {
-        Expr::ListExpr(x) | Expr::ConsExpr(x) | Expr::EmptyExpr(x) | Expr::CdrExpr(x) => List::Cdr(Cdr { list: Box::new(x) }),
-        Expr::VariableExpr(x) => List::Cdr(Cdr {
+        Expr::ListExpr(x) | Expr::ConsExpr(x) | Expr::EmptyExpr(x) | Expr::CdrExpr(x) => Cdr { list: Box::new(x) },
+        Expr::VariableExpr(x) => Cdr {
             list: Box::new(List::Variable(x)),
-        }),
+        },
         _ => panic!("Malformed cdr expr: argument is not a list"),
     }
 }

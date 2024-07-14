@@ -8,8 +8,9 @@ use crate::interpret_cond::*;
 use crate::interpret_function::*;
 use crate::interpret_function_call::interpret_function_call;
 use crate::interpret_function_call::FunctionCall;
+use crate::interpret_list::interpret_car_expr;
 use crate::interpret_list::Car;
-use crate::interpret_list::{interpret_car_expr, interpret_list_expr, List};
+use crate::interpret_list::{interpret_list_expr, List};
 use crate::interpret_num::*;
 use crate::interpret_variable::*;
 use crate::lexer::string_to_tokens;
@@ -124,10 +125,10 @@ pub fn interpret(expr: &Expr, variable_map: &mut VariableMap, function_map: &Fun
         Expr::CondExpr(x) => interpret_cond_expr(&x, variable_map, function_map),
         Expr::VariableExpr(x) => interpret_variable_expr(&x, variable_map),
         Expr::FunctionCallExpr(x) => interpret_function_call(&x, variable_map, function_map),
+        Expr::CarExpr(x) => interpret_car_expr(x, variable_map, function_map),
         Expr::ListExpr(x) | Expr::ConsExpr(x) | Expr::EmptyExpr(x) | Expr::CdrExpr(x) => {
             Value::List(interpret_list_expr(&x, variable_map, function_map))
         }
-        Expr::CarExpr(x) => interpret_car_expr(&x, variable_map, function_map),
         // Function definitions should be interpreted in the previous pass.
         Expr::FunctionExpr(_) => panic!("Encountered function expr"),
     }
