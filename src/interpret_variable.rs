@@ -11,6 +11,6 @@ pub fn interpret_variable_expr(variable: &VariableExpr, variable_map: &VariableM
             [.., val] => val.clone(),
             _ => panic!("Val not found"),
         },
-        None => panic!("Undefined variable"),
+        None => panic!("Undefined variable {}", variable.name),
     }
 }
