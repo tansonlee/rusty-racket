@@ -409,3 +409,135 @@ fn test_list_flatten() {
         interpret_program_snippet("(list 1 2 3 4 5 6 7 8 9)".to_string())
     );
 }
+
+#[test]
+fn test_list_take() {
+    fn list_take_program_factory(list: &str, val: &str) -> String {
+        format!(
+            "
+        (include stdlib::list)
+        (define (main) (list::take {} {}))
+            ",
+            list, val
+        )
+    }
+
+    assert_eq!(
+        interpret_program(list_take_program_factory("empty", "0")),
+        interpret_program_snippet("empty".to_string())
+    );
+    assert_eq!(
+        interpret_program(list_take_program_factory("(list 1 2 3)", "3")),
+        interpret_program_snippet("(list 1 2 3)".to_string())
+    );
+    assert_eq!(
+        interpret_program(list_take_program_factory("(list 1 2 3 4 5 6)", "3")),
+        interpret_program_snippet("(list 1 2 3)".to_string())
+    );
+}
+
+#[test]
+fn test_list_drop() {
+    fn list_drop_program_factory(list: &str, val: &str) -> String {
+        format!(
+            "
+        (include stdlib::list)
+        (define (main) (list::drop {} {}))
+            ",
+            list, val
+        )
+    }
+
+    assert_eq!(
+        interpret_program(list_drop_program_factory("empty", "0")),
+        interpret_program_snippet("empty".to_string())
+    );
+    assert_eq!(
+        interpret_program(list_drop_program_factory("(list 1 2 3)", "3")),
+        interpret_program_snippet("empty".to_string())
+    );
+    assert_eq!(
+        interpret_program(list_drop_program_factory("(list 1 2 3 4 5 6)", "3")),
+        interpret_program_snippet("(list 4 5 6)".to_string())
+    );
+}
+
+#[test]
+fn test_list_min() {
+    fn list_min_program_factory(list: &str) -> String {
+        format!(
+            "
+        (include stdlib::list)
+        (define (main) (list::min {}))
+            ",
+            list
+        )
+    }
+
+    assert_eq!(
+        interpret_program(list_min_program_factory("(list 1 2 3)")),
+        interpret_program_snippet("1".to_string())
+    );
+    assert_eq!(
+        interpret_program(list_min_program_factory("(list 3 2 1)")),
+        interpret_program_snippet("1".to_string())
+    );
+}
+
+#[test]
+fn test_list_max() {
+    fn list_min_program_factory(list: &str) -> String {
+        format!(
+            "
+        (include stdlib::list)
+        (define (main) (list::max {}))
+            ",
+            list
+        )
+    }
+
+    assert_eq!(
+        interpret_program(list_min_program_factory("(list 1 2 3)")),
+        interpret_program_snippet("3".to_string())
+    );
+    assert_eq!(
+        interpret_program(list_min_program_factory("(list 3 2 1)")),
+        interpret_program_snippet("3".to_string())
+    );
+}
+
+#[test]
+fn test_list_sort() {
+    fn list_sort_program_factory(list: &str) -> String {
+        format!(
+            "
+        (include stdlib::list)
+        (define (main) (list::sort {}))
+            ",
+            list
+        )
+    }
+
+    assert_eq!(
+        interpret_program(list_sort_program_factory("empty")),
+        interpret_program_snippet("empty".to_string())
+    );
+    assert_eq!(
+        interpret_program(list_sort_program_factory("(list 1 2 3)")),
+        interpret_program_snippet("(list 1 2 3)".to_string())
+    );
+    assert_eq!(
+        interpret_program(list_sort_program_factory("(list 9 1 8 4 3 2 7 6 5)")),
+        interpret_program_snippet("(list 1 2 3 4 5 6 7 8 9)".to_string())
+    );
+    assert_eq!(
+        interpret_program(list_sort_program_factory("(list 9 1 8 4 3 2 7 6 5)")),
+        interpret_program_snippet("(list 1 2 3 4 5 6 7 8 9)".to_string())
+    );
+    assert_eq!(
+        interpret_program(list_sort_program_factory(
+            "(list 9 9 17 3 15 20 13 3 14 5 20 17 13 13 17 9 20 3 2 19)"
+        )),
+        interpret_program_snippet("(list 2 3 3 3 5 9 9 9 13 13 13 14 15 17 17 17 19 20 20 20)".to_string())
+    );
+}

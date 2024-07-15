@@ -109,16 +109,26 @@ pub fn parse_functions(program: String) -> FunctionMap {
 pub fn interpret_program(program: String) -> Value {
     // Preprocessor for includes. (can make this smarter in the future)
     let re = Regex::new(r"\(include ([^\)]+)\)").unwrap();
-    let processed = re
-        .replace_all(&program, |captures: &regex::Captures| {
-            let module_name = &captures[1];
-            if module_name == "stdlib::list" {
-                get_module_content(module_name)
-            } else {
-                panic!("Unknown module name {}", module_name);
-            }
-        })
-        .to_string();
+    let mut processed = program;
+    loop {
+        let new_processed = re
+            .replace_all(&processed, |captures: &regex::Captures| {
+                let module_name = &captures[1];
+                if module_name == "stdlib::list" || module_name == "stdlib::num" {
+                    get_module_content(module_name)
+                } else {
+                    panic!("Unknown module name {}", module_name);
+                }
+            })
+            .to_string();
+        if new_processed == processed {
+            break;
+        }
+
+        processed = new_processed;
+    }
+
+    println!("PROCESSED {}", processed);
 
     // First interpret all of the functions to fill the function map.
     let function_map = parse_functions(processed);
