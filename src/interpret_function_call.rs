@@ -1,23 +1,24 @@
 use crate::interpret::{interpret, Expr, FunctionMap, Value, VariableMap};
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct FunctionCall {
+pub struct FunctionCallExpr {
     pub name: String,
     pub arguments: Vec<Expr>,
 }
 
 pub fn interpret_function_call(
-    function_call: &FunctionCall,
+    function_call: &FunctionCallExpr,
     variable_map: &mut VariableMap,
     function_map: &FunctionMap,
 ) -> Value {
+    // 1. Interpret all of the arguments into the function.
     let argument_values: Vec<_> = function_call
         .arguments
         .iter()
         .map(|expr| interpret(expr, variable_map, function_map))
         .collect();
 
-    // Add the vars to the environment.
+    // 2. Add the parameters to the variable map so the function can access its parameter values.
     for i in 0..argument_values.len() {
         let arg = argument_values.get(i).unwrap();
         let name = &function_map
@@ -28,15 +29,17 @@ pub fn interpret_function_call(
         variable_map.entry(name.to_string()).or_insert(Vec::new()).push(arg.clone());
     }
 
+    // 3. Get the body of the function.
     let function_body = &function_map
         .get(&function_call.name)
         .clone()
         .expect(&format!("Undefined function '{}'", &function_call.name))
         .body;
 
+    // 4. Execute the function itself and get the result.
     let result = interpret(&function_body, variable_map, function_map);
 
-    // Remove the vars to the environment.
+    // 5. Clean up by removing the parameters from the environment.
     for i in 0..argument_values.len() {
         let name = &function_map[&function_call.name].parameter_names[i];
         variable_map.get_mut(name).expect("Expected variable not found").pop();

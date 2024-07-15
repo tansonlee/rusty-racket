@@ -81,6 +81,20 @@ impl<'a> Iterator for TokenIter<'a> {
     }
 }
 
+pub fn string_to_tokens(s: String) -> Vec<Token> {
+    let mut result = Vec::new();
+    let mut s_iterator = s.chars().into_iter().peekable();
+
+    consume_whitespace(&mut s_iterator);
+    while s_iterator.peek().is_some() {
+        let token = token_from_position(&mut s_iterator);
+        result.push(token);
+        consume_whitespace(&mut s_iterator);
+    }
+
+    result
+}
+
 pub fn token_kind_to_binary_num_op(kind: &TokenKind) -> BinaryNumOp {
     match kind {
         TokenKind::Plus => BinaryNumOp::Add,
@@ -252,20 +266,6 @@ fn token_from_position(s: &mut std::iter::Peekable<std::str::Chars>) -> Token {
         },
         x => todo!("Unhandled case in token_from_position {}", x),
     }
-}
-
-pub fn string_to_tokens(s: String) -> Vec<Token> {
-    let mut result = Vec::new();
-    let mut s_iterator = s.chars().into_iter().peekable();
-
-    consume_whitespace(&mut s_iterator);
-    while s_iterator.peek().is_some() {
-        let token = token_from_position(&mut s_iterator);
-        result.push(token);
-        consume_whitespace(&mut s_iterator);
-    }
-
-    result
 }
 
 fn consume_whitespace(it: &mut Peekable<Chars<'_>>) {

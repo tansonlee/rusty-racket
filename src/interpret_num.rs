@@ -1,7 +1,7 @@
 use crate::interpret::{FunctionMap, Value, VariableMap, N};
-use crate::interpret_function_call::{interpret_function_call, FunctionCall};
-use crate::interpret_list::{interpret_car_expr, Car};
-use crate::interpret_variable::{interpret_variable_expr, Variable};
+use crate::interpret_function_call::{interpret_function_call, FunctionCallExpr};
+use crate::interpret_list::{interpret_car_expr, CarExpr};
+use crate::interpret_variable::{interpret_variable_expr, VariableExpr};
 
 #[derive(PartialEq, Debug, Clone)]
 pub enum BinaryNumOp {
@@ -12,29 +12,30 @@ pub enum BinaryNumOp {
     Mod,
 }
 
+// All possible expression types that can result in a NumValue.
 #[derive(Debug, Clone, PartialEq)]
-pub enum Num {
-    Literal(N),
-    Variable(Variable),
-    Binary(Box<BinaryNumExpr>),
-    FunctionCall(FunctionCall),
-    Car(Car),
+pub enum NumExpr {
+    LiteralNumExpr(N),
+    VariableExpr(VariableExpr),
+    BinaryNumExpr(Box<BinaryNumExpr>),
+    FunctionCallExpr(FunctionCallExpr),
+    CarExpr(CarExpr),
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct BinaryNumExpr {
     pub op: BinaryNumOp,
-    pub left: Num,
-    pub right: Num,
+    pub left: NumExpr,
+    pub right: NumExpr,
 }
 
-pub fn interpret_num_expr(expr: &Num, variable_map: &mut VariableMap, function_map: &FunctionMap) -> N {
+pub fn interpret_num_expr(expr: &NumExpr, variable_map: &mut VariableMap, function_map: &FunctionMap) -> N {
     match expr {
-        Num::Literal(x) => *x,
-        Num::Binary(x) => interpret_binary_num_expr(x, variable_map, function_map),
-        Num::Variable(x) => interpret_variable_num_expr(x, variable_map),
-        Num::FunctionCall(x) => {
-            if let Value::Num(y) = interpret_function_call(x, variable_map, function_map) {
+        NumExpr::LiteralNumExpr(x) => *x,
+        NumExpr::BinaryNumExpr(x) => interpret_binary_num_expr(x, variable_map, function_map),
+        NumExpr::VariableExpr(x) => interpret_variable_num_expr(x, variable_map),
+        NumExpr::FunctionCallExpr(x) => {
+            if let Value::NumValue(y) = interpret_function_call(x, variable_map, function_map) {
                 y
             } else {
                 panic!(
@@ -43,8 +44,8 @@ pub fn interpret_num_expr(expr: &Num, variable_map: &mut VariableMap, function_m
                 );
             }
         }
-        Num::Car(x) => {
-            if let Value::Num(y) = interpret_car_expr(x, variable_map, function_map) {
+        NumExpr::CarExpr(x) => {
+            if let Value::NumValue(y) = interpret_car_expr(x, variable_map, function_map) {
                 y
             } else {
                 panic!()
@@ -71,11 +72,11 @@ fn interpret_binary_num_expr(expr: &BinaryNumExpr, variable_map: &mut VariableMa
     }
 }
 
-fn interpret_variable_num_expr(expr: &Variable, variable_map: &VariableMap) -> N {
+fn interpret_variable_num_expr(expr: &VariableExpr, variable_map: &VariableMap) -> N {
     let res = interpret_variable_expr(expr, variable_map);
 
     match res {
-        Value::Num(x) => x,
+        Value::NumValue(x) => x,
         x => panic!("Variable {} does not refer to a num value", x),
     }
 }

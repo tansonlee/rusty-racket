@@ -1,20 +1,21 @@
 use crate::interpret::{interpret, Expr, FunctionMap, Value, ValueList, VariableMap, B};
-use crate::interpret_function_call::{interpret_function_call, FunctionCall};
-use crate::interpret_list::{interpret_car_expr, interpret_list_expr, Car, List};
+use crate::interpret_function_call::{interpret_function_call, FunctionCallExpr};
+use crate::interpret_list::{interpret_car_expr, interpret_list_expr, CarExpr, ListExpr};
 use crate::interpret_num::*;
-use crate::interpret_variable::{interpret_variable_expr, Variable};
+use crate::interpret_variable::{interpret_variable_expr, VariableExpr};
 
+// All possible expression types that can result in a BoolValue.
 #[derive(Debug, Clone, PartialEq)]
-pub enum Bool {
-    Literal(B),
-    Variable(Variable),
-    Binary(Box<BinaryBoolExpr>),
-    Unary(Box<UnaryBoolExpr>),
-    Cmp(Box<CmpBoolExpr>),
-    FunctionCall(FunctionCall),
-    EmptyHuh(EmptyHuhExpr),
-    ListHuh(ListHuhExpr),
-    Car(Car),
+pub enum BoolExpr {
+    LiteralBoolExpr(B),
+    VariableExpr(VariableExpr),
+    BinaryBoolExpr(Box<BinaryBoolExpr>),
+    UnaryBoolExpr(Box<UnaryBoolExpr>),
+    CmpExpr(Box<CmpBoolExpr>),
+    FunctionCallExpr(FunctionCallExpr),
+    EmptyHuhExpr(EmptyHuhExpr),
+    ListHuhExpr(ListHuhExpr),
+    CarExpr(CarExpr),
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -38,26 +39,26 @@ pub enum CmpBoolOp {
 #[derive(Debug, Clone, PartialEq)]
 pub struct BinaryBoolExpr {
     pub op: BinaryBoolOp,
-    pub left: Bool,
-    pub right: Bool,
+    pub left: BoolExpr,
+    pub right: BoolExpr,
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct UnaryBoolExpr {
     pub op: UnaryBoolOp,
-    pub value: Bool,
+    pub value: BoolExpr,
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct CmpBoolExpr {
     pub op: CmpBoolOp,
-    pub left: Num,
-    pub right: Num,
+    pub left: NumExpr,
+    pub right: NumExpr,
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct EmptyHuhExpr {
-    pub list: Box<List>,
+    pub list: Box<ListExpr>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -65,17 +66,17 @@ pub struct ListHuhExpr {
     pub expr: Box<Expr>,
 }
 
-pub fn interpret_bool_expr(expr: &Bool, variable_map: &mut VariableMap, function_map: &FunctionMap) -> B {
+pub fn interpret_bool_expr(expr: &BoolExpr, variable_map: &mut VariableMap, function_map: &FunctionMap) -> B {
     match expr {
-        Bool::Literal(x) => *x,
-        Bool::Variable(x) => interpret_variable_bool_expr(&x, variable_map),
-        Bool::Binary(x) => interpret_binary_bool_expr(&x, variable_map, function_map),
-        Bool::Unary(x) => interpret_unary_bool_expr(&x, variable_map, function_map),
-        Bool::Cmp(x) => interpret_cmp_bool_expr(&x, variable_map, function_map),
-        Bool::EmptyHuh(x) => interpret_empty_huh_expr(x, variable_map, function_map),
-        Bool::ListHuh(x) => interpret_list_huh_expr(x, variable_map, function_map),
-        Bool::FunctionCall(x) => {
-            if let Value::Bool(x) = interpret_function_call(&x, variable_map, function_map) {
+        BoolExpr::LiteralBoolExpr(x) => *x,
+        BoolExpr::VariableExpr(x) => interpret_variable_bool_expr(&x, variable_map),
+        BoolExpr::BinaryBoolExpr(x) => interpret_binary_bool_expr(&x, variable_map, function_map),
+        BoolExpr::UnaryBoolExpr(x) => interpret_unary_bool_expr(&x, variable_map, function_map),
+        BoolExpr::CmpExpr(x) => interpret_cmp_bool_expr(&x, variable_map, function_map),
+        BoolExpr::EmptyHuhExpr(x) => interpret_empty_huh_expr(x, variable_map, function_map),
+        BoolExpr::ListHuhExpr(x) => interpret_list_huh_expr(x, variable_map, function_map),
+        BoolExpr::FunctionCallExpr(x) => {
+            if let Value::BoolValue(x) = interpret_function_call(&x, variable_map, function_map) {
                 x
             } else {
                 panic!(
@@ -84,8 +85,8 @@ pub fn interpret_bool_expr(expr: &Bool, variable_map: &mut VariableMap, function
                 );
             }
         }
-        Bool::Car(x) => {
-            if let Value::Bool(y) = interpret_car_expr(x, variable_map, function_map) {
+        BoolExpr::CarExpr(x) => {
+            if let Value::BoolValue(y) = interpret_car_expr(x, variable_map, function_map) {
                 y
             } else {
                 panic!()
@@ -94,11 +95,11 @@ pub fn interpret_bool_expr(expr: &Bool, variable_map: &mut VariableMap, function
     }
 }
 
-fn interpret_variable_bool_expr(expr: &Variable, variable_map: &VariableMap) -> B {
+fn interpret_variable_bool_expr(expr: &VariableExpr, variable_map: &VariableMap) -> B {
     let res = interpret_variable_expr(expr, variable_map);
 
     match res {
-        Value::Bool(x) => x,
+        Value::BoolValue(x) => x,
         x => panic!("Variable {} does not refer to a bool value.", x),
     }
 }
@@ -156,7 +157,7 @@ pub fn interpret_list_huh_expr(expr: &ListHuhExpr, variable_map: &mut VariableMa
     let res = interpret(&expr.expr, variable_map, function_map);
 
     match res {
-        Value::List(_) => true,
+        Value::ListValue(_) => true,
         _ => false,
     }
 }

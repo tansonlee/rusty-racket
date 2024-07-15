@@ -12,6 +12,7 @@ cargo run <filename>
 
 -   [ ] add comments
 -   [ ] refactor to make names more consistent
+-   [ ] add more helpers for nums and bools to alias operations like add, or lteq, gteq
 
 ### Future ideas
 

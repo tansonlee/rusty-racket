@@ -1,47 +1,48 @@
 use crate::{
     interpret::{interpret, Expr, FunctionMap, Value, ValueList, ValueNode, VariableMap, L},
-    interpret_function_call::{interpret_function_call, FunctionCall},
-    interpret_variable::{interpret_variable_expr, Variable},
+    interpret_function_call::{interpret_function_call, FunctionCallExpr},
+    interpret_variable::{interpret_variable_expr, VariableExpr},
 };
 
+// All possible expression types that can result in a ListValue.
 #[derive(Debug, Clone, PartialEq)]
-pub struct Node {
-    pub data: Box<Expr>,
-    pub next: Box<List>,
+pub enum ListExpr {
+    ListLiteralExpr(ListLiteralExpr),
+    CdrExpr(CdrExpr),
+    VariableExpr(VariableExpr),
+    CarExpr(CarExpr),
+    FunctionCallExpr(FunctionCallExpr),
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum List {
-    ListLiteral(ListLiteral),
-    Cdr(Cdr),
-    Variable(Variable),
-    Car(Car),
-    FunctionCall(FunctionCall),
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum ListLiteral {
+pub enum ListLiteralExpr {
     Empty,
     Node(Node),
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Car {
-    pub list: Box<List>,
+pub struct Node {
+    pub data: Box<Expr>,
+    pub next: Box<ListExpr>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Cdr {
-    pub list: Box<List>,
+pub struct CarExpr {
+    pub list: Box<ListExpr>,
 }
 
-pub fn interpret_list_expr(list: &List, variable_map: &mut VariableMap, function_map: &FunctionMap) -> L {
+#[derive(Debug, Clone, PartialEq)]
+pub struct CdrExpr {
+    pub list: Box<ListExpr>,
+}
+
+pub fn interpret_list_expr(list: &ListExpr, variable_map: &mut VariableMap, function_map: &FunctionMap) -> L {
     match list {
-        List::ListLiteral(x) => interpret_list_literal_expr(x, variable_map, function_map),
-        List::Cdr(x) => interpret_cdr_expr(&x, variable_map, function_map),
-        List::Variable(x) => interpret_variable_list_expr(x, variable_map),
-        List::FunctionCall(x) => {
-            if let Value::List(y) = interpret_function_call(x, variable_map, function_map) {
+        ListExpr::ListLiteralExpr(x) => interpret_list_literal_expr(x, variable_map, function_map),
+        ListExpr::CdrExpr(x) => interpret_cdr_expr(&x, variable_map, function_map),
+        ListExpr::VariableExpr(x) => interpret_variable_list_expr(x, variable_map),
+        ListExpr::FunctionCallExpr(x) => {
+            if let Value::ListValue(y) = interpret_function_call(x, variable_map, function_map) {
                 y
             } else {
                 panic!(
@@ -50,8 +51,8 @@ pub fn interpret_list_expr(list: &List, variable_map: &mut VariableMap, function
                 );
             }
         }
-        List::Car(x) => {
-            if let Value::List(y) = interpret_car_expr(x, variable_map, function_map) {
+        ListExpr::CarExpr(x) => {
+            if let Value::ListValue(y) = interpret_car_expr(x, variable_map, function_map) {
                 y
             } else {
                 panic!("Malformed car expression {:#?}", x);
@@ -60,10 +61,10 @@ pub fn interpret_list_expr(list: &List, variable_map: &mut VariableMap, function
     }
 }
 
-pub fn interpret_list_literal_expr(list: &ListLiteral, variable_map: &mut VariableMap, function_map: &FunctionMap) -> L {
+pub fn interpret_list_literal_expr(list: &ListLiteralExpr, variable_map: &mut VariableMap, function_map: &FunctionMap) -> L {
     match list {
-        ListLiteral::Empty => ValueList::Empty,
-        ListLiteral::Node(y) => {
+        ListLiteralExpr::Empty => ValueList::Empty,
+        ListLiteralExpr::Node(y) => {
             let interpreted_data = interpret(&y.data, variable_map, function_map);
             let interpreted_next = interpret_list_expr(&y.next, variable_map, function_map);
 
@@ -75,7 +76,7 @@ pub fn interpret_list_literal_expr(list: &ListLiteral, variable_map: &mut Variab
     }
 }
 
-pub fn interpret_car_expr(list: &Car, variable_map: &mut VariableMap, function_map: &FunctionMap) -> Value {
+pub fn interpret_car_expr(list: &CarExpr, variable_map: &mut VariableMap, function_map: &FunctionMap) -> Value {
     let result = interpret_list_expr(&list.list, variable_map, function_map);
     match result {
         ValueList::Empty => panic!("Argument to car cannot be empty"),
@@ -83,7 +84,7 @@ pub fn interpret_car_expr(list: &Car, variable_map: &mut VariableMap, function_m
     }
 }
 
-pub fn interpret_cdr_expr(list: &Cdr, variable_map: &mut VariableMap, function_map: &FunctionMap) -> L {
+pub fn interpret_cdr_expr(list: &CdrExpr, variable_map: &mut VariableMap, function_map: &FunctionMap) -> L {
     let res = interpret_list_expr(&list.list, variable_map, function_map);
 
     match res {
@@ -92,11 +93,11 @@ pub fn interpret_cdr_expr(list: &Cdr, variable_map: &mut VariableMap, function_m
     }
 }
 
-pub fn interpret_variable_list_expr(expr: &Variable, variable_map: &VariableMap) -> L {
+pub fn interpret_variable_list_expr(expr: &VariableExpr, variable_map: &VariableMap) -> L {
     let res = interpret_variable_expr(expr, variable_map);
 
     match res {
-        Value::List(x) => x,
+        Value::ListValue(x) => x,
         x => panic!("Variable {} does not refer to a num value", x),
     }
 }
