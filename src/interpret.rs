@@ -47,11 +47,41 @@ pub enum ValueList {
     Node(ValueNode),
 }
 
+fn get_value_list_elements(list: &ValueList) -> String {
+    let mut elements = Vec::new();
+
+    for value in list.to_vec() {
+        elements.push(value);
+    }
+
+    let mut result = String::new();
+
+    for e in elements {
+        result.push_str(&format!("{} ", e));
+    }
+
+    result.trim_end().to_string()
+}
+
+impl ValueList {
+    pub fn to_vec(&self) -> Vec<Value> {
+        let mut result = Vec::new();
+        let mut current = self;
+
+        while let ValueList::Node(node) = current {
+            result.push(*node.data.clone());
+            current = &*node.next;
+        }
+
+        result
+    }
+}
+
 impl fmt::Display for ValueList {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             ValueList::Empty => write!(f, "empty"),
-            ValueList::Node(node) => write!(f, "({} -> {})", node.data, node.next),
+            ValueList::Node(_) => write!(f, "(list {})", get_value_list_elements(self)),
         }
     }
 }
