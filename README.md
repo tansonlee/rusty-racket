@@ -10,18 +10,16 @@ cargo run <filename>
 
 ## Introduction
 
-Rusty Racket is a Turing complete purely functional language. The name is derived from the fact that the interpreter is written in Rust. Rusty Racket is a dialect of the programming language Racket which is a dialect of Scheme which is a dialect of Lisp.
+Rusty Racket is a Turing complete purely functional language. The name comes from the fact that its interpreter is written in Rust. Rusty Racket is a dialect of the programming language Racket which is a dialect of Scheme which is a dialect of Lisp.
 
-The language contains all essential features such as conditionals, user defined functions, lists, and more. It comes with a standard library with built-in numerical and list functions.
+The language includes essential features such as conditionals, user-defined functions, lists, and more. It also comes with a standard library that offers built-in numerical and list functions.
 
-## About the Project
-
-The interpreter is created in the conventional manner. The overview is as follows:
+About the Project The interpreter is created using a conventional approach. The process is as follows:
 
 1. **Preprocessor**: Resolves module includes.
-2. **Tokenizer**: Takes the program as a string and creates a list of tokens that the program is comprised of.
-3. **Parser**: Takes the tokens and creates an abstract syntax tree.
-4. **Interpreter**: Takes the abstract syntax tree and evaluates it to produce the final result.
+2. **Tokenizer**: Converts the program string into a list of tokens.
+3. **Parser**: Transforms the tokens into an abstract syntax tree.
+4. **Interpreter**: Evaluates the abstract syntax tree to produce the final result.
 
 ## Examples
 
@@ -36,7 +34,7 @@ All of these examples and more can be found in the `/examples` folder
         [(= n 1) 1]
         [true (+ (fibonacci (- n 1)) (fibonacci (- n 2)))]))
 
-(define (main) (fibonacci 10))
+(define (main) (fibonacci 10)) ; produces 55
 ```
 
 **List Sum**: computes the sum of the elements of a list.
@@ -72,11 +70,13 @@ All of these examples and more can be found in the `/examples` folder
         [true
          (__list::sorted-merge (list::sort (list::take lst (/ (list::length lst) 2)))
                                (list::sort (list::drop lst (/ (list::length lst) 2))))]))
+
+(define (main) (list::sort (list 5 1 4 2 3))) ; produces (list 1 2 3 4 5)
 ```
 
 ## Syntax
 
-A program is comprised of module includes and function definitions. One of the functions must be named `main` and take 0 arguments. The result of the program is the result produced by executing the main function.
+A program consists of module includes and function definitions. One of the functions must be named main and take no arguments. The result of the program is the output produced by executing the main function.
 
 ### Module Includes
 
