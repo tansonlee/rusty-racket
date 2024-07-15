@@ -15,9 +15,9 @@ use crate::interpret_list::CarExpr;
 use crate::interpret_list::{interpret_list_expr, ListExpr};
 use crate::interpret_num::*;
 use crate::interpret_variable::*;
-use crate::lexer::string_to_tokens;
-use crate::lexer::TokenIter;
 use crate::parser::{parse, parse_expr};
+use crate::tokenizer::string_to_tokens;
+use crate::tokenizer::TokenIter;
 
 // Concrete value types that represent results of expression evaluation.
 pub type N = i32;

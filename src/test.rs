@@ -4,8 +4,8 @@ use itertools::peek_nth;
 
 use crate::{
     interpret::*,
-    lexer::{string_to_tokens, TokenIter},
     parser::{parse, parse_num_expr},
+    tokenizer::{string_to_tokens, TokenIter},
 };
 
 fn get_example_program(file: &str) -> String {

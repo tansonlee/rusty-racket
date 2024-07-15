@@ -12,7 +12,7 @@ use crate::interpret_list::ListLiteralExpr;
 use crate::interpret_list::{ListExpr, Node};
 use crate::interpret_num::*;
 use crate::interpret_variable::*;
-use crate::lexer::*;
+use crate::tokenizer::*;
 
 pub fn parse(program: String) -> Expr {
     let tokens = string_to_tokens(program);
