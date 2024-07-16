@@ -14,7 +14,9 @@ Rusty Racket is a Turing complete purely functional language. The name comes fro
 
 The language includes essential features such as conditionals, user-defined functions, lists, and more. It also comes with a standard library that offers built-in numerical and list functions.
 
-About the Project The interpreter is created using a conventional approach. The process is as follows:
+## About the Project
+
+The interpreter is created using a conventional approach. The process is as follows:
 
 1. **Preprocessor**: Resolves module includes.
 2. **Tokenizer**: Converts the program string into a list of tokens.
