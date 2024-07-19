@@ -1,8 +1,5 @@
 (include stdlib::list)
+(include stdlib::bst)
 
-(define (list-sum lst)
-    (cond
-        [(empty? lst) 0]
-        [true (+ (car lst) (list-sum (cdr lst)))]))
 
-(define (main) (list-sum (list::create 0 2000)))
+(define (main) (bst::depth (bst::from-list (list::create 0 1000))))

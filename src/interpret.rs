@@ -147,10 +147,13 @@ pub fn interpret_program(program: String) -> Value {
                 let module_name = &captures[1];
                 if included_modules.contains(module_name) {
                     "".to_string()
-                } else if module_name == "stdlib::list" || module_name == "stdlib::num" || module_name == "stdlib::binary-tree" || module_name == "stdlib::bst" {
+                } else if module_name == "stdlib::list"
+                    || module_name == "stdlib::num"
+                    || module_name == "stdlib::binary-tree"
+                    || module_name == "stdlib::bst"
+                {
                     included_modules.insert(module_name.to_string());
                     get_module_content(module_name)
-
                 } else {
                     panic!("Unknown module name {}", module_name);
                 }
