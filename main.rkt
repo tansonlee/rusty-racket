@@ -1,3 +1,8 @@
 (include stdlib::list)
 
-(define (main) (list::sort (list 3 2 1)))
+(define (list-sum lst)
+    (cond
+        [(empty? lst) 0]
+        [true (+ (car lst) (list-sum (cdr lst)))]))
+
+(define (main) (list-sum (list::create 0 2000)))

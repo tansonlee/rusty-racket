@@ -162,6 +162,7 @@ To determine if a value is a list, use the `list?` function.
 
 -   [ ] Add support for comments
 -   [ ] Add more helpers for nums and bools to alias operations like add, or lteq, gteq
+-   [ ] Create a let* statement or with statemement that supports (with ([x 1] [y (+ x 1)] y))
 
 ## Future ideas
 
@@ -170,5 +171,5 @@ To determine if a value is a list, use the `list?` function.
     -   [ ] Let functions be returned from other functions
     -   [ ] Let functions be a parameter into another function
 -   [ ] Support command line arguments into the rusty racket programs
--   [ ] Variable number of arguments to a function
+-   [ ] Variadic functions
     -   [ ] If there is exactly a single argument using the keyword argslist

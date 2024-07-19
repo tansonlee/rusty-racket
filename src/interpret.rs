@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::fmt;
 use std::fs;
 
@@ -112,12 +113,6 @@ pub struct FunctionInfo {
     pub body: Expr,
 }
 
-#[derive(Debug)]
-pub struct Environment {
-    pub variable_map: HashMap<String, Vec<Value>>,
-    pub functions: HashMap<String, FunctionInfo>,
-}
-
 pub type VariableMap = HashMap<String, Vec<Value>>;
 pub type FunctionMap = HashMap<String, FunctionInfo>;
 
@@ -143,14 +138,19 @@ pub fn interpret_program(program: String) -> Value {
     // 1. Preprocessor: handle module includes. (can make this smarter in the future)
     let re = Regex::new(r"\(include ([^\)]+)\)").unwrap();
     let mut processed = program;
+    let mut included_modules = HashSet::new();
     // Repeat substitution while possible. Do this because one substitution may
     // substitute in code that contains potential new substitutions.
     loop {
         let new_processed = re
             .replace_all(&processed, |captures: &regex::Captures| {
                 let module_name = &captures[1];
-                if module_name == "stdlib::list" || module_name == "stdlib::num" {
+                if included_modules.contains(module_name) {
+                    "".to_string()
+                } else if module_name == "stdlib::list" || module_name == "stdlib::num" || module_name == "stdlib::binary-tree" || module_name == "stdlib::bst" {
+                    included_modules.insert(module_name.to_string());
                     get_module_content(module_name)
+
                 } else {
                     panic!("Unknown module name {}", module_name);
                 }

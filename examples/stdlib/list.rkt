@@ -24,6 +24,11 @@
         [(empty? lst1) lst2]
         [true (cons (car lst1) (list::append (cdr lst1) lst2))]))
 
+(define (list::nth lst n)
+    (cond
+        [(= n 0) (car lst)]
+        [true (list::nth (cdr lst) (- n 1))]))
+
 (define (list::take lst n)
     (cond
         [(= n 0) empty]
@@ -65,3 +70,9 @@
         [true 
          (__list::sorted-merge (list::sort (list::take lst (/ (list::length lst) 2)))
                                (list::sort (list::drop lst (/ (list::length lst) 2))))]))
+
+(define (list::create start end)
+    (cond
+        [(> start end) empty]
+        [true (cons start (list::create (+ start 1) end))]))
+        
